@@ -1,42 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="880" height="420" viewBox="0 0 880 420" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
-<rect width="880" height="420" fill="#fcfcfb"/>
-<circle cx="63.0" cy="18" r="5" fill="#2a78d6"/>
-<text x="73.0" y="22" font-size="12" fill="#52514e">Static IP (固定制)</text>
-<circle cx="207.0" cy="18" r="5" fill="#eb6834"/>
-<text x="217.0" y="22" font-size="12" fill="#52514e">Dynamic IP (浮動制)</text>
-<text x="58" y="25.0" font-size="13" font-weight="600" fill="#0b0b0b">遊戲路徑 p95 · SDR relay RTT</text>
-<line x1="58" y1="184.0" x2="784.0" y2="184.0" stroke="#e6e5e0" stroke-width="1"/>
-<text x="50" y="188.0" font-size="11" text-anchor="end" fill="#8a8880">0</text>
-<line x1="58" y1="109.0" x2="784.0" y2="109.0" stroke="#e6e5e0" stroke-width="1"/>
-<text x="50" y="113.0" font-size="11" text-anchor="end" fill="#8a8880">50</text>
-<line x1="58" y1="34.0" x2="784.0" y2="34.0" stroke="#e6e5e0" stroke-width="1"/>
-<text x="50" y="38.0" font-size="11" text-anchor="end" fill="#8a8880">100</text>
-<text x="50" y="22.0" font-size="11" text-anchor="end" fill="#8a8880">ms</text>
-<polyline fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" points="58.0,133.0 784.0,98.5"/>
-<circle cx="58.0" cy="133.0" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="784.0" cy="98.5" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<polyline fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" points="58.0,124.0 784.0,98.5"/>
-<circle cx="58.0" cy="124.0" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="784.0" cy="98.5" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
-<text x="792.0" y="96.0" font-size="12" font-weight="600" fill="#2a78d6">57 ms</text>
-<text x="792.0" y="109.0" font-size="12" font-weight="600" fill="#eb6834">57 ms</text>
-<text x="58" y="205.0" font-size="13" font-weight="600" fill="#0b0b0b">Cloudflare 1.1.1.1 中位數</text>
-<line x1="58" y1="364.0" x2="784.0" y2="364.0" stroke="#e6e5e0" stroke-width="1"/>
-<text x="50" y="368.0" font-size="11" text-anchor="end" fill="#8a8880">0</text>
-<line x1="58" y1="289.0" x2="784.0" y2="289.0" stroke="#e6e5e0" stroke-width="1"/>
-<text x="50" y="293.0" font-size="11" text-anchor="end" fill="#8a8880">25</text>
-<line x1="58" y1="214.0" x2="784.0" y2="214.0" stroke="#e6e5e0" stroke-width="1"/>
-<text x="50" y="218.0" font-size="11" text-anchor="end" fill="#8a8880">50</text>
-<text x="50" y="202.0" font-size="11" text-anchor="end" fill="#8a8880">ms</text>
-<polyline fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" points="58.0,355.0 784.0,355.0"/>
-<circle cx="58.0" cy="355.0" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="784.0" cy="355.0" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<polyline fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" points="58.0,289.0 784.0,292.0"/>
-<circle cx="58.0" cy="289.0" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="784.0" cy="292.0" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
-<text x="792.0" y="296.0" font-size="12" font-weight="600" fill="#eb6834">24 ms</text>
-<text x="792.0" y="359.0" font-size="12" font-weight="600" fill="#2a78d6">3 ms</text>
-<text x="58.0" y="382.0" font-size="11" text-anchor="middle" fill="#8a8880">08/26</text>
-<text x="784.0" y="382.0" font-size="11" text-anchor="middle" fill="#8a8880">08/27</text>
-<text x="58" y="412" font-size="11" fill="#8a8880">每日彙整 · 最後一天仍在累積中 · 產生時間 2026-08-27 22:56</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="454" viewBox="0 0 880 454" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
+<rect width="880" height="454" fill="#fcfcfb"/>
+<circle cx="63.0" cy="20" r="5" fill="#2a78d6"/>
+<text x="73.0" y="24" font-size="12" fill="#52514e">Static IP (固定制)</text>
+<circle cx="207.0" cy="20" r="5" fill="#eb6834"/>
+<text x="217.0" y="24" font-size="12" fill="#52514e">Dynamic IP (浮動制)</text>
+<text x="58" y="49.0" font-size="13" font-weight="600" fill="#0b0b0b">遊戲路徑 p95 · SDR relay RTT（ms）</text>
+<line x1="58" y1="210.0" x2="784.0" y2="210.0" stroke="#e6e5e0" stroke-width="1"/>
+<text x="50" y="214.0" font-size="11" text-anchor="end" fill="#8a8880">0</text>
+<line x1="58" y1="135.0" x2="784.0" y2="135.0" stroke="#e6e5e0" stroke-width="1"/>
+<text x="50" y="139.0" font-size="11" text-anchor="end" fill="#8a8880">30</text>
+<line x1="58" y1="60.0" x2="784.0" y2="60.0" stroke="#e6e5e0" stroke-width="1"/>
+<text x="50" y="64.0" font-size="11" text-anchor="end" fill="#8a8880">60</text>
+<polyline fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" points="58.0,125.0 784.0,70.0"/>
+<circle cx="58.0" cy="125.0" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="784.0" cy="70.0" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<polyline fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" points="58.0,110.0 784.0,70.0"/>
+<circle cx="58.0" cy="110.0" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="784.0" cy="70.0" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<text x="792.0" y="67.5" font-size="12" font-weight="600" fill="#2a78d6">56 ms</text>
+<text x="792.0" y="80.5" font-size="12" font-weight="600" fill="#eb6834">56 ms</text>
+<text x="58" y="233.0" font-size="13" font-weight="600" fill="#0b0b0b">Cloudflare 1.1.1.1 中位數（ms）</text>
+<line x1="58" y1="394.0" x2="784.0" y2="394.0" stroke="#e6e5e0" stroke-width="1"/>
+<text x="50" y="398.0" font-size="11" text-anchor="end" fill="#8a8880">0</text>
+<line x1="58" y1="319.0" x2="784.0" y2="319.0" stroke="#e6e5e0" stroke-width="1"/>
+<text x="50" y="323.0" font-size="11" text-anchor="end" fill="#8a8880">15</text>
+<line x1="58" y1="244.0" x2="784.0" y2="244.0" stroke="#e6e5e0" stroke-width="1"/>
+<text x="50" y="248.0" font-size="11" text-anchor="end" fill="#8a8880">30</text>
+<polyline fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" points="58.0,379.0 784.0,379.0"/>
+<circle cx="58.0" cy="379.0" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="784.0" cy="379.0" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<polyline fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" points="58.0,269.0 784.0,274.0"/>
+<circle cx="58.0" cy="269.0" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="784.0" cy="274.0" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<text x="792.0" y="278.0" font-size="12" font-weight="600" fill="#eb6834">24 ms</text>
+<text x="792.0" y="383.0" font-size="12" font-weight="600" fill="#2a78d6">3 ms</text>
+<text x="58.0" y="412.0" font-size="11" text-anchor="middle" fill="#8a8880">08/26</text>
+<text x="784.0" y="412.0" font-size="11" text-anchor="middle" fill="#8a8880">08/27</text>
+<text x="58" y="446" font-size="11" fill="#8a8880">每日彙整 · 最後一天仍在累積中 · 產生時間 2026-08-27 23:16</text>
 </svg>

@@ -29,6 +29,26 @@ PANELS = [
 ]
 
 
+def ceiling(v):
+    """Axis top with finer steps than gen_report's 1/2/2.5/5.
+
+    Daily maxima cluster in the 20-60 ms range, where the coarse ladder rounds 57 to 100
+    and 25 to 50 -- half the panel left empty and both series pressed into the baseline.
+    The headroom is 4%, not 15%, because the end labels sit outside the plot area, so a
+    point near the top edge collides with nothing.
+    """
+    import math
+    if v <= 0:
+        return 1
+    exp = math.floor(math.log10(v))
+    base = 10.0 ** exp
+    for m in (1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10):
+        if v <= m * base:
+            top = m * base
+            return int(top) if top == int(top) else top
+    return int(10 * base)
+
+
 def pct(values, q):
     """Nearest-rank percentile. q=0.5 gives the median."""
     if not values:
@@ -81,7 +101,10 @@ def write_csv(daily, path_out):
 
 def svg(daily, days, theme_name, path_out):
     th = gr.THEME[theme_name]
-    W, PH, PAD_L, PAD_R, PAD_T, GAP = 880, 150, 58, 96, 34, 30
+    # PAD_T has to clear the legend band, not just the panel title: at 34 the legend
+    # (baseline 24) and the first title (baseline PAD_T-9 = 25) printed on top of
+    # each other, both starting at PAD_L.
+    W, PH, PAD_L, PAD_R, PAD_T, GAP = 880, 150, 58, 96, 60, 34
     H = PAD_T + len(PANELS) * (PH + GAP) + 26
     o = ['<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d" '
          'font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">'
@@ -99,8 +122,8 @@ def svg(daily, days, theme_name, path_out):
     # legend, always present for two series; the end labels repeat identity in text
     lx = PAD_L
     for p in gr.ORDER:
-        o.append('<circle cx="%.1f" cy="18" r="5" fill="%s"/>' % (lx + 5, th["series"][p]))
-        o.append('<text x="%.1f" y="22" font-size="12" fill="%s">%s</text>'
+        o.append('<circle cx="%.1f" cy="20" r="5" fill="%s"/>' % (lx + 5, th["series"][p]))
+        o.append('<text x="%.1f" y="24" font-size="12" fill="%s">%s</text>'
                  % (lx + 15, th["ink2"], gr.esc(gr.LABEL[p])))
         lx += 30 + 7.6 * len(gr.LABEL[p])
 
@@ -109,13 +132,13 @@ def svg(daily, days, theme_name, path_out):
         vals = [daily[(d, p)][field][stat]
                 for d in days for p in gr.ORDER
                 if (d, p) in daily and field in daily[(d, p)]]
-        hi = gr.nice_ceiling(max(vals) * 1.15) if vals else 1
+        hi = ceiling(max(vals) * 1.04) if vals else 1
 
         def Y(v, _top=top, _hi=hi):
             return _top + PH - (PH * min(v, _hi) / _hi)
 
         o.append('<text x="%d" y="%.1f" font-size="13" font-weight="600" fill="%s">%s</text>'
-                 % (PAD_L, top - 9, th["ink"], gr.esc(title)))
+                 % (PAD_L, top - 11, th["ink"], gr.esc("%s（%s）" % (title, unit))))
         for k in range(3):
             v = hi * k / 2.0
             y = Y(v)
@@ -123,8 +146,6 @@ def svg(daily, days, theme_name, path_out):
                      % (PAD_L, y, W - PAD_R, y, th["grid"]))
             o.append('<text x="%d" y="%.1f" font-size="11" text-anchor="end" fill="%s">%s</text>'
                      % (PAD_L - 8, y + 4, th["ink3"], "%g" % v))
-        o.append('<text x="%d" y="%.1f" font-size="11" text-anchor="end" fill="%s">%s</text>'
-                 % (PAD_L - 8, top - 12, th["ink3"], unit))
 
         ends = []
         for p in gr.ORDER:
