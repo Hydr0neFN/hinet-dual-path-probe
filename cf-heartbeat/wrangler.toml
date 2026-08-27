@@ -1,0 +1,31 @@
+name = "pi-heartbeat"
+main = "src/worker.js"
+compatibility_date = "2026-08-01"
+
+# Checks every 5 minutes whether the Pi has gone quiet.
+[triggers]
+crons = ["*/5 * * * *"]
+
+[vars]
+# How long the Pi may stay silent before an email goes out.
+# 900s = 15 min, i.e. three missed 5-minute heartbeats. Raise it if the house
+# internet blips often enough to be noisy.
+ALERT_AFTER_SECONDS = "900"
+# Must be an address on a domain in THIS Cloudflare account with Email Routing enabled.
+# The mailbox does not have to exist; Cloudflare only needs to own the domain.
+FROM_ADDRESS = "pi-watchdog@REPLACE-WITH-YOUR-DOMAIN"
+# Must be a VERIFIED destination address in Cloudflare Email Routing.
+TO_ADDRESS = "you@example.com"
+
+# Filled in by:  npx wrangler kv namespace create HB
+[[kv_namespaces]]
+binding = "HB"
+id = "REPLACE-WITH-KV-NAMESPACE-ID"
+
+# Email Routing send binding. destination_address must also be verified.
+[[send_email]]
+name = "MAILER"
+destination_address = "you@example.com"
+
+# BEAT_TOKEN is a secret, not a var:
+#   npx wrangler secret put BEAT_TOKEN
