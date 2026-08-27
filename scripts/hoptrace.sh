@@ -8,5 +8,5 @@ for ttl in $(seq 1 "${3:-16}"); do
   IP=$(echo "$L" | grep -oiE '(from )[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -1 | awk '{print $2}')
   T=$(echo "$L" | grep -oE 'time=[0-9.]+' | cut -d= -f2)
   if echo "$L" | grep -q 'Time to live exceeded'; then printf "%2d  %-16s\n" "$ttl" "$IP"
-  else printf "%2d  %-16s %sms  <<< DEST\n" "$ttl" "$IP" "${T:-?}"; return 0; fi
+  else printf "%2d  %-16s %sms  <<< DEST\n" "$ttl" "$IP" "${T:-?}"; exit 0; fi
 done

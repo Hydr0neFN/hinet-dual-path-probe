@@ -44,7 +44,7 @@ Email Routing must be able to send on your behalf:
 `wrangler deploy` prints the Worker URL. On the Pi:
 
 ```
-ssh rpi4-lan
+# on the probe host
 echo 'https://pi-heartbeat.<your-subdomain>.workers.dev/beat?token=<BEAT_TOKEN>' > /etc/heartbeat.url
 chmod 600 /etc/heartbeat.url
 /usr/local/sbin/heartbeat.sh && echo sent
@@ -62,7 +62,8 @@ curl "https://pi-heartbeat.<your-subdomain>.workers.dev/status?token=<BEAT_TOKEN
 
 Should print the last-seen time and the Pi health line. To prove the alert path works,
 stop the timer on the Pi (`systemctl stop heartbeat.timer`), wait 15 minutes, and confirm
-the email arrives — then start it again. Do this **before** you fly, not after.
+the email arrives — then start it again. Verify the alert path while you can still walk
+over to the machine; an untested dead-man switch is not a dead-man switch.
 
 ## What the emails say
 

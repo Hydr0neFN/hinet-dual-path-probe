@@ -13,13 +13,25 @@ KEY=${DEPLOY_KEY:-/root/.ssh/id_probe_publish}
 export GIT_SSH_COMMAND="ssh -i $KEY -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
 
 cd "$REPO" || { echo "no repo at $REPO"; exit 1; }
+
+# The timer and a manual run WILL collide otherwise: two publishes racing produced a
+# stale index.lock and a rejected push the first time this ran. Non-blocking, so the
+# loser simply skips this cycle rather than queueing up behind the winner.
+exec 9>/run/probe-publish.lock
+flock -n 9 || { echo "$(date -Is) another publish in flight, skipping"; exit 0; }
 [ -s "$CSV" ] || { echo "no probe data at $CSV"; exit 1; }
 
-# Someone may have edited the prose from the web UI. Take theirs, keep ours for the
-# generated files, and never let a conflict wedge an unattended timer.
-git fetch --quiet origin main || true
+# Every file this script commits is regenerated from the CSV two lines below, so there
+# is never anything local worth preserving. Taking the remote wholesale means prose edited
+# from the web UI always survives, and an unattended timer can never wedge on a conflict.
+# (The previous version passed -X ours, which did the opposite of what its comment claimed,
+# and fell back to a hard reset that could only lose work.)
+if ! git fetch --quiet origin main; then
+  echo "$(date -Is) fetch failed, skipping this cycle"
+  exit 0
+fi
 git checkout --quiet main
-git merge --quiet -X ours --no-edit origin/main 2>/dev/null || git reset --hard --quiet origin/main
+git reset --hard --quiet origin/main
 
 python3 "$REPO/tools/gen_report.py" "$CSV" "$REPO/data" || exit 1
 

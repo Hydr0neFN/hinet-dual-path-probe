@@ -44,13 +44,31 @@ conclusion this way. It was wrong, and the next day's data contradicted it.
 The fix: a single host holds **both account types up at once**. The primary path is the
 router's normal connection; the second is a PPPoE session dialled by the Pi itself with
 `nodefaultroute`, kept off the default route and reachable only through a policy-routing
-rule. Every loop iteration measures both, microseconds apart. Any difference is the
-path, because the moment is identical.
+rule. Every loop iteration measures both **concurrently**, so whatever transient hits the
+line hits both paths at once and cancels out of the comparison.
 
+> **Correction, and a warning if you copy this.** The first version of `probe.sh` measured
+> the two paths one after the other — 8.6 s and 10.4 s respectively — while stamping both
+> rows with the loop-start time. The CSV *looked* simultaneous and was about 9 s apart.
+> Samples before `2026-08-27 21:02` carry that offset. It is far too small to explain the
+> Cloudflare result (a 20× difference sustained for hours) but it was an overstatement,
+> and a shared timestamp column is a very easy way to fool yourself.
+
+```sh
+# /etc/ppp/peers/<name>
+nodefaultroute          # the measurement session must never become the system default
+
+# /etc/ppp/ip-up.d/50measure   ($1=iface $4=local IP $6=ipparam)
+[ "$6" = "measure" ] || exit 0
+ip route replace default dev "$1" table 200      # <- without this the rule does nothing
+ip rule del priority 200 2>/dev/null
+ip rule add from "$4" lookup 200 priority 200
 ```
-/etc/ppp/peers/<name>       nodefaultroute      # never becomes the system default
-/etc/ppp/ip-up.d/50measure  ip rule add from <src> lookup 200 priority 200
-```
+
+Both halves are needed: the `ip rule` sends traffic *sourced from* the second session to
+table 200, and the `ip route` is what gives table 200 somewhere to send it. With only the
+rule, lookups fall through to the main table and you silently measure the same path twice —
+which is exactly the failure that made the first attempt at this experiment worthless.
 
 The Pi is not a router and does not carry household traffic. It only holds a second
 session so the two paths can be compared fairly.
@@ -91,7 +109,7 @@ See [data/stats.md](data/stats.md) for live figures. The shape of the result:
 
 | | Static IP | Dynamic IP |
 |---|---|---|
-| **Game path** (Tokyo SDR relay, UDP) | median ~34 ms | median ~34 ms — **same-instant delta ≈ 0 ms** |
+| **Game path** (Tokyo SDR relay, UDP) | median ~34 ms | median ~34 ms — **paired delta ≈ 0 ms** |
 | Game path p95 | flat, ≈ the median | wanders 38–52 ms |
 | **Cloudflare 1.1.1.1** | 3 ms, unwavering | 24 ms baseline, **200 ms+ under evening load, with packet loss** |
 

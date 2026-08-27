@@ -46,7 +46,17 @@ mount_ssd() {
     log "mounted but NOT writable -> treating as dirty"
   fi
   # not mounted, or mounted read-only / unwritable
-  mountpoint -q /mnt/ssd && umount /mnt/ssd 2>/dev/null
+  if mountpoint -q /mnt/ssd; then
+    umount /mnt/ssd 2>/dev/null || umount -l /mnt/ssd 2>/dev/null
+    sleep 1
+  fi
+  # Running e2fsck against a still-mounted filesystem corrupts it. If we cannot get
+  # it detached, stop here and let a human look instead.
+  if findmnt -S "$DEV" >/dev/null 2>&1; then
+    log "REFUSING e2fsck: $DEV is still mounted somewhere"
+    alert "RPi4: SSD is stuck mounted and unwritable; refusing to fsck it. Needs a human."
+    return 1
+  fi
   log "running e2fsck -p (safe repairs only) on $DEV"
   timeout 900 e2fsck -p "$DEV"
   rc=$?
@@ -61,7 +71,9 @@ mount_ssd() {
 }
 
 # 0. Fast path: everything already healthy.
-if mountpoint -q /mnt/ssd && timeout 5 stat /mnt/ssd >/dev/null 2>&1; then
+if mountpoint -q /mnt/ssd && timeout 5 stat /mnt/ssd >/dev/null 2>&1 \
+   && timeout 5 touch /mnt/ssd/.rwtest 2>/dev/null; then
+  rm -f /mnt/ssd/.rwtest
   if ! mountpoint -q /var/lib/qbt; then
     mount /var/lib/qbt && log "re-bound /var/lib/qbt"
     systemctl is-enabled qbittorrent >/dev/null 2>&1 && systemctl restart qbittorrent

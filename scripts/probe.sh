@@ -4,6 +4,7 @@
 #   ppp0 source  -> table 200     -> Pi's own PPPoE session
 CSV=/root/netmeasure/paired.csv
 MTRDIR=/root/netmeasure/mtr
+mkdir -p "$MTRDIR"
 TOKYO=45.121.184.27
 CF=1.1.1.1
 GOOG=8.8.8.8
@@ -26,22 +27,45 @@ while true; do
   ETH=$(ip -4 -o addr show eth0 | awk '{print $4}' | cut -d/ -f1)
   PPP=$(ip -4 -o addr show ppp0 2>/dev/null | awk '{print $4}' | cut -d/ -f1)
   DEGRADED=0
+  # Both paths are sampled CONCURRENTLY. Run one after the other, each takes 8.6-10.4 s,
+  # so the second path was measured ~9 s after the first while both rows carried the
+  # loop-start timestamp -- the comparison looked simultaneous and was not. Whatever
+  # transient hits the line now hits both paths together, which is the whole point.
+  TMP=$(mktemp -d)
   for pair in "modem:$ETH" "pppoe:$PPP"; do
     NAME=${pair%%:*}; SRC=${pair#*:}
-    [ -z "$SRC" ] && { echo "$TS,$NAME,DOWN,-1,100,-1,100,-1,100,-1" >> "$CSV"; DEGRADED=1; continue; }
-    T=$(probe "$SRC" "$TOKYO"); C=$(probe "$SRC" "$CF"); G=$(probe "$SRC" "$GOOG")
-    # End-to-end UDP RTT to the relay's game port -- the transport CS2 actually uses.
-    # RTT only: the relay answers junk datagrams non-deterministically (16-33% no-reply
-    # at every inter-packet gap tested), so its loss figure is meaningless. ICMP owns loss.
-    SDR=$(timeout 20 python3 /root/netmeasure/sdrping.py "$SRC" "$TOKYO" 27023 8 2>/dev/null | cut -d, -f1)
-    [ -z "$SDR" ] && SDR=-1
-    echo "$TS,$NAME,$SRC,$T,$C,$G,$SDR" >> "$CSV"
-    TA=${T%%,*}; TL=${T##*,}; CA=${C%%,*}
+    (
+      if [ -z "$SRC" ]; then
+        echo "$TS,$NAME,DOWN,-1,100,-1,100,-1,100,-1" > "$TMP/$NAME"
+        exit 0
+      fi
+      T=$(probe "$SRC" "$TOKYO"); C=$(probe "$SRC" "$CF"); G=$(probe "$SRC" "$GOOG")
+      # End-to-end UDP RTT to the relay's game port -- the transport CS2 actually uses.
+      # RTT only: the relay answers junk datagrams non-deterministically (16-33% no-reply
+      # at every inter-packet gap tested), so its loss figure is meaningless. ICMP owns loss.
+      SDR=$(timeout 20 python3 /root/netmeasure/sdrping.py "$SRC" "$TOKYO" 27023 8 2>/dev/null | cut -d, -f1)
+      [ -z "$SDR" ] && SDR=-1
+      echo "$TS,$NAME,$SRC,$T,$C,$G,$SDR" > "$TMP/$NAME"
+    ) &
+  done
+  wait
+
+  for NAME in modem pppoe; do
+    [ -s "$TMP/$NAME" ] || { DEGRADED=1; continue; }
+    LINE=$(cat "$TMP/$NAME")
+    echo "$LINE" >> "$CSV"
+    TA=$(echo "$LINE" | cut -d, -f4)
+    TL=$(echo "$LINE" | cut -d, -f5)
+    CA=$(echo "$LINE" | cut -d, -f6)
+    SDR=$(echo "$LINE" | cut -d, -f10)
     [ "$TA" -gt 60 ] 2>/dev/null && DEGRADED=1
     [ "$TL" -gt 0 ]  2>/dev/null && DEGRADED=1
     [ "$CA" -gt 50 ] 2>/dev/null && DEGRADED=1
     [ "$SDR" -gt 60 ] 2>/dev/null && DEGRADED=1
+    # -1 means the relay answered nothing at all: worse than slow, not "less than 60".
+    [ "$SDR" -lt 0 ] 2>/dev/null && DEGRADED=1
   done
+  rm -rf "$TMP"
   NOW=$(date +%s)
   # Captures run detached: a synchronous trace blocked the sampling loop for ~3.4 min,
   # so the probe stopped measuring exactly during the degradation it was recording.

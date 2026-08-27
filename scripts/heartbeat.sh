@@ -38,5 +38,17 @@ SUFFIX=""
 case "$HA" in 200|30[123]|401) : ;; *) SUFFIX="/fail" ;; esac
 [ "${ROOTPCT:-0}" -ge 90 ] 2>/dev/null && SUFFIX="/fail"
 
-curl -fsS -m 20 --retry 3 --retry-delay 5 --data-raw "$BODY" "${URL}${SUFFIX}" >/dev/null 2>&1
+# The URL carries ?token=..., so appending /fail to the whole string puts the suffix
+# inside the query value: the token stops matching and every degraded ping 403s.
+# Insert the suffix into the PATH, before the query string.
+if [ -n "$SUFFIX" ]; then
+  case "$URL" in
+    *\?*) TARGET="${URL%%\?*}${SUFFIX}?${URL#*\?}" ;;
+    *)    TARGET="${URL}${SUFFIX}" ;;
+  esac
+else
+  TARGET="$URL"
+fi
+
+curl -fsS -m 20 --retry 3 --retry-delay 5 --data-raw "$BODY" "$TARGET" >/dev/null 2>&1
 exit 0

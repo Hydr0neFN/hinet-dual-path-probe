@@ -118,12 +118,16 @@ def svg(series_by_panel, t0, t1, theme_name, path_out):
         a(f'<text x="{lx+16}" y="{PAD_T-15}" font-size="12" fill="{T["ink2"]}">{esc(LABEL[p])}</text>')
         lx += 190
 
-    for pi, (title, unit, data) in enumerate(series_by_panel):
+    for pi, panel in enumerate(series_by_panel):
+        title, unit, data = panel[0], panel[1], panel[2]
+        fixed_max = panel[3] if len(panel) > 3 else None
         top = PAD_T + pi * (PH + GAP)
         bot = top + PH
         vals = [v for p in ORDER for _, v in data.get(p, [])]
-        vmax = max(vals) if vals else 1
-        vmax = max(vmax * 1.15, 1)
+        if fixed_max:
+            vmax = fixed_max
+        else:
+            vmax = max(max(vals) if vals else 1, 1) * 1.15
 
         def Y(v):
             return bot - (v / vmax) * PH
@@ -210,8 +214,8 @@ def main():
          {p: bucket(win, "cf_avg", p) for p in ORDER}),
         ("Steam Datagram Relay, Tokyo — round-trip time (the path CS2 actually uses)", "ms",
          {p: bucket(win, "sdr_udp_rtt", p) for p in ORDER}),
-        ("Samples reporting packet loss", "%",
-         {p: loss_rate(win, p) for p in ORDER}),
+        ("Samples reporting packet loss", "% of samples",
+         {p: loss_rate(win, p) for p in ORDER}, 100),
     ]
     for name in ("light", "dark"):
         svg(panels, t0, t1, name, os.path.join(OUT, f"chart-{name}.svg"))
@@ -228,17 +232,22 @@ def main():
 
     # table view
     def agg(field, p, subset):
-        v = [x for x in (num(r.get(field)) for r in subset if r["path"] == p) if x]
+        v = [x for x in (num(r.get(field)) for r in subset if r["path"] == p)
+             if x is not None]
         if not v:
             return None
         v.sort()
         return st.median(v), v[min(len(v) - 1, int(len(v) * 0.95))]
 
     lines = ["# Measured results", "",
-             f"Window: `{rows[0]['ts']}` → `{rows[-1]['ts']}` · **{len(rows)} samples** "
+             f"Whole dataset: `{rows[0]['ts']}` → `{rows[-1]['ts']}` · **{len(rows)} samples** "
              f"(`{sum(1 for r in rows if r['path']=='modem')}` per path)", "",
-             "Both paths are measured from the same host, in the same loop iteration, "
-             "microseconds apart — so any difference is the path, not the moment.", "",
+             f"> These tables cover **every** sample ever recorded. The chart in the README "
+             f"shows only the most recent {WINDOW_H} h, so the two will diverge as the run "
+             f"gets longer.", "",
+             "Both paths are measured from the same host, concurrently, in the same loop "
+             "iteration — so any difference is the path, not the moment. (Samples before "
+             "2026-08-27 21:02 were taken sequentially, about 9 s apart; see the README.)", "",
              "| metric | Static IP median | Static IP p95 | Dynamic IP median | Dynamic IP p95 |",
              "|---|---|---|---|---|"]
     for field, name in (("sdr_udp_rtt", "Tokyo SDR relay, UDP RTT (ms)"),
@@ -249,7 +258,7 @@ def main():
         if a1 and a2:
             lines.append(f"| {name} | {a1[0]:.0f} | {a1[1]:.0f} | {a2[0]:.0f} | {a2[1]:.0f} |")
 
-    lines += ["", "## Same-instant deltas (dynamic minus static)", "",
+    lines += ["", "## Paired deltas (dynamic minus static, same loop iteration)", "",
               "| metric | median | p95 | share of samples where dynamic is worse by >5 ms |",
               "|---|---|---|---|"]
     by_ts = {}
@@ -263,7 +272,7 @@ def main():
         d = []
         for p in pairs:
             x, y = num(p["modem"].get(field)), num(p["pppoe"].get(field))
-            if x and y:
+            if x is not None and y is not None:
                 d.append(y - x)
         if d:
             d.sort()
