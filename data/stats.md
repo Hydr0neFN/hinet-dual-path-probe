@@ -22,4 +22,4 @@ Both paths are measured from the same host, concurrently, in the same loop itera
 | Cloudflare 1.1.1.1 RTT | +21 ms | +183 ms | 85.0% |
 | Google 8.8.8.8 RTT | +0 ms | +12 ms | 7.6% |
 
-_Regenerated automatically from the live probe. Last update: 2026-08-27 21:04 (UTC+8)._
+_Regenerated automatically from the live probe. Last update: 2026-08-27 21:06 (UTC+8)._
