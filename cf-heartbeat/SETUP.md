@@ -1,81 +1,78 @@
-# Pi dead-man switch on Cloudflare — setup
+# Pi 的 dead-man switch，架在 Cloudflare 上
 
-Why this exists: every alert the Pi can raise goes through Home Assistant, so a total
-failure (power cut, dead SD card, kernel wedge, network gone) raises nothing at all.
-This Worker is the one alert that does not live on the machine it is watching.
+**繁體中文** · [English](SETUP.en.md)
 
-Cost: zero. Workers free tier covers 100k requests/day; this uses ~288.
+為什麼需要這個：這台機器能發出的每一種警報，都是透過跑在它自己身上的 Home Assistant 送出去的。
+也就是說，**當它徹底掛掉時（斷電、SD 卡壞掉、kernel 卡死、網路斷線），你不會收到任何通知**。
 
-## What you run
+這個 Worker 是唯一一個**不住在被監控機器上**的警報。
 
-Everything below runs in this terminal. Prefix each with `!` so the output lands in the
-session, e.g. `! npx wrangler login`.
+費用：零。Workers 免費方案是每天 10 萬次請求，這個大概用 288 次。
+
+## 你要執行的指令
+
+以下全部在終端機執行。每一行前面加 `!`，輸出就會留在對話裡，例如 `! npx wrangler login`。
 
 ```
-cd <this directory>
+cd <這個目錄>
 
-# 1. Authenticate (opens a browser once)
+# 1. authenticate（會開一次瀏覽器）
 npx wrangler login
 
-# 2. Create the KV namespace, then paste the printed id into wrangler.toml
+# 2. 建立 KV namespace，然後把印出來的 id 貼進 wrangler.toml
 npx wrangler kv namespace create HB
 
-# 3. Set the shared secret the Pi will present. Pick a long random string and keep it.
+# 3. 設定 Pi 要出示的共用密鑰。挑一串夠長的隨機字串，記下來。
 npx wrangler secret put BEAT_TOKEN
 
-# 4. Edit wrangler.toml: FROM_ADDRESS domain + the KV id from step 2
+# 4. 編輯 wrangler.toml：FROM_ADDRESS 的網域，以及第 2 步拿到的 KV id
 
-# 5. Deploy
+# 5. 部署
 npx wrangler deploy
 ```
 
-## Cloudflare dashboard prerequisites
+## Cloudflare 後台的前置設定
 
-Email Routing must be able to send on your behalf:
+Email Routing 必須被授權代你寄信：
 
-1. Email → Email Routing → enable it on the domain you used in `FROM_ADDRESS`.
-2. Email Routing → Destination addresses → add `you@example.com` and click the
-   verification link Cloudflare emails you. **The Worker cannot send until this is verified.**
-   (`you-alt@example.com` can be added as a second destination; change `TO_ADDRESS` and
-   `destination_address` if you would rather it went there.)
+1. Email → Email Routing → 在 `FROM_ADDRESS` 用的那個網域上啟用。
+2. Email Routing → Destination addresses → 加入你的收件信箱，並點擊 Cloudflare 寄給你的驗證信。
+   **在驗證完成之前，Worker 是寄不出信的。**
 
-## Then point the Pi at it
+## 然後把 Pi 指過去
 
-`wrangler deploy` prints the Worker URL. On the Pi:
+`wrangler deploy` 會印出 Worker 的 URL。在探針主機上：
 
 ```
-# on the probe host
-echo 'https://pi-heartbeat.<your-subdomain>.workers.dev/beat?token=<BEAT_TOKEN>' > /etc/heartbeat.url
+echo 'https://pi-heartbeat.<你的子網域>.workers.dev/beat?token=<BEAT_TOKEN>' > /etc/heartbeat.url
 chmod 600 /etc/heartbeat.url
 /usr/local/sbin/heartbeat.sh && echo sent
 ```
 
-`heartbeat.timer` is already installed and enabled on the Pi and fires every 5 minutes.
-Until `/etc/heartbeat.url` exists the script exits 0 and does nothing, so nothing breaks
-if you never finish this.
+`heartbeat.timer` 已經安裝並啟用，每 5 分鐘觸發一次。在 `/etc/heartbeat.url` 出現之前，腳本會直接
+以 rc=0 結束、什麼也不做 —— 所以就算你一直沒設定完，也不會有任何東西壞掉。
 
-## Verify end to end
+## 端到端驗證
 
 ```
-curl "https://pi-heartbeat.<your-subdomain>.workers.dev/status?token=<BEAT_TOKEN>"
+curl "https://pi-heartbeat.<你的子網域>.workers.dev/status?token=<BEAT_TOKEN>"
 ```
 
-Should print the last-seen time and the Pi health line. To prove the alert path works,
-stop the timer on the Pi (`systemctl stop heartbeat.timer`), wait 15 minutes, and confirm
-the email arrives — then start it again. Verify the alert path while you can still walk
-over to the machine; an untested dead-man switch is not a dead-man switch.
+應該會印出最後一次回報的時間與 Pi 的健康摘要。
 
-## What the emails say
+要證明**警報路徑**真的會動，就把 Pi 上的 timer 停掉（`systemctl stop heartbeat.timer`），等 15 分鐘，
+確認信有寄到，然後再啟動。**趁你還走得到那台機器的時候驗證** —— 沒測過的 dead-man switch 不算
+dead-man switch。
 
-- **"RPi4 has gone silent (…)"** — no heartbeat past the threshold. Sent once per outage.
-  Includes the last health line received, so you know what state it was in when it died.
-- **"RPi4 is back online"** — sent when heartbeats resume, with how long it was gone.
-- **"RPi4 reports a problem"** — the Pi is alive but self-reporting degradation
-  (a failed systemd unit, HA not answering on 8123, or root filesystem ≥90% full).
-  Edge-triggered, so it does not repeat every five minutes.
+## 信件內容
 
-## Note on the threshold vs. reboots
+- **「RPi4 has gone silent (…)」** —— 超過門檻沒收到心跳。每次故障只寄一封，內含最後一次收到的
+  健康摘要，讓你知道它死掉當下是什麼狀態。
+- **「RPi4 is back online」** —— 心跳恢復時寄出，附上失聯了多久。
+- **「RPi4 reports a problem」** —— 機器還活著，但自己回報異常（有 systemd unit 失敗、HA 的 8123
+  沒回應、或 root 檔案系統用量 ≥ 90%）。這封是**邊緣觸發**，不會每五分鐘重複轟炸。
 
-A watchdog reboot takes well under 15 minutes, so a single self-healing reboot will not
-email you. That is deliberate: you want to hear about outages you have to act on, not
-about the machine fixing itself.
+## 關於門檻與重開機
+
+watchdog 造成的重開遠少於 15 分鐘，所以單次自我修復的重開**不會**寄信給你。這是刻意的：你要收到的
+是「需要你採取行動」的故障，不是「機器自己修好了」的通知。

@@ -87,6 +87,19 @@ def loss_rate(rows, path):
     return sorted((k, sum(1 for x in v if x > 0) / len(v) * 100) for k, v in acc.items())
 
 
+def nice_ceiling(v):
+    """Round an axis ceiling up to 1/2/2.5/5 x 10^n, so ticks read 0/50/100 not 0/121/241."""
+    import math
+    if v <= 0:
+        return 1
+    exp = math.floor(math.log10(v))
+    base = 10 ** exp
+    for m in (1, 2, 2.5, 5, 10):
+        if v <= m * base:
+            return int(m * base) if m * base >= 1 else m * base
+    return int(10 * base)
+
+
 def esc(s):
     return (str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
 
@@ -94,7 +107,7 @@ def esc(s):
 def svg(series_by_panel, t0, t1, theme_name, path_out):
     """series_by_panel: [(title, unit, {path: [(t, v)]}), ...]"""
     T = THEME[theme_name]
-    W, PAD_L, PAD_R, PAD_T = 900, 62, 132, 34
+    W, PAD_L, PAD_R, PAD_T = 900, 62, 132, 58
     PH, GAP = 132, 40                       # panel height / gap between panels
     n = len(series_by_panel)
     H = PAD_T + n * PH + (n - 1) * GAP + 52
@@ -114,8 +127,8 @@ def svg(series_by_panel, t0, t1, theme_name, path_out):
     # each line is also directly labelled at its right end
     lx = PAD_L
     for p in ORDER:
-        a(f'<rect x="{lx}" y="{PAD_T-24}" width="10" height="10" rx="2" fill="{T["series"][p]}"/>')
-        a(f'<text x="{lx+16}" y="{PAD_T-15}" font-size="12" fill="{T["ink2"]}">{esc(LABEL[p])}</text>')
+        a(f'<rect x="{lx}" y="10" width="10" height="10" rx="2" fill="{T["series"][p]}"/>')
+        a(f'<text x="{lx+16}" y="19" font-size="12" fill="{T["ink2"]}">{esc(LABEL[p])}</text>')
         lx += 190
 
     for pi, panel in enumerate(series_by_panel):
@@ -127,7 +140,7 @@ def svg(series_by_panel, t0, t1, theme_name, path_out):
         if fixed_max:
             vmax = fixed_max
         else:
-            vmax = max(max(vals) if vals else 1, 1) * 1.15
+            vmax = nice_ceiling(max(max(vals) if vals else 1, 1) * 1.15)
 
         def Y(v):
             return bot - (v / vmax) * PH
@@ -193,7 +206,7 @@ def svg(series_by_panel, t0, t1, theme_name, path_out):
         a(f'<text x="{X(t):.1f}" y="{y}" font-size="11" text-anchor="middle" '
           f'fill="{T["ink3"]}">{t.strftime("%m-%d %H:%M")}</text>')
     a(f'<text x="{PAD_L}" y="{y+20}" font-size="11" fill="{T["ink3"]}">'
-      f'{esc(f"{BUCKET_MIN}-minute medians · both paths measured from one host at the same instant · times UTC+8")}</text>')
+      f'{esc(f"{BUCKET_MIN} 分鐘中位數 · 兩條路徑由同一台主機同時量測 · 時間為 UTC+8")}</text>')
     a("</svg>")
     open(path_out, "w", encoding="utf-8").write("\n".join(o))
 
@@ -210,11 +223,11 @@ def main():
     t0, t1 = win[0]["_t"], win[-1]["_t"]
 
     panels = [
-        ("Cloudflare 1.1.1.1 — round-trip time", "ms",
+        ("Cloudflare 1.1.1.1 — 往返延遲 RTT", "ms",
          {p: bucket(win, "cf_avg", p) for p in ORDER}),
-        ("Steam Datagram Relay, Tokyo — round-trip time (the path CS2 actually uses)", "ms",
+        ("Steam Datagram Relay 東京 — 往返延遲 RTT（CS2 實際走的路徑）", "ms",
          {p: bucket(win, "sdr_udp_rtt", p) for p in ORDER}),
-        ("Samples reporting packet loss", "% of samples",
+        ("回報封包遺失的樣本比例", "% 樣本",
          {p: loss_rate(win, p) for p in ORDER}, 100),
     ]
     for name in ("light", "dark"):
@@ -239,27 +252,25 @@ def main():
         v.sort()
         return st.median(v), v[min(len(v) - 1, int(len(v) * 0.95))]
 
-    lines = ["# Measured results", "",
-             f"Whole dataset: `{rows[0]['ts']}` → `{rows[-1]['ts']}` · **{len(rows)} samples** "
-             f"(`{sum(1 for r in rows if r['path']=='modem')}` per path)", "",
-             f"> These tables cover **every** sample ever recorded. The chart in the README "
-             f"shows only the most recent {WINDOW_H} h, so the two will diverge as the run "
-             f"gets longer.", "",
-             "Both paths are measured from the same host, concurrently, in the same loop "
-             "iteration — so any difference is the path, not the moment. (Samples before "
-             "2026-08-27 21:02 were taken sequentially, about 9 s apart; see the README.)", "",
-             "| metric | Static IP median | Static IP p95 | Dynamic IP median | Dynamic IP p95 |",
+    lines = ["# 量測結果", "",
+             f"完整資料集：`{rows[0]['ts']}` → `{rows[-1]['ts']}` · **{len(rows)} 筆樣本**"
+             f"（每條路徑 `{sum(1 for r in rows if r['path']=='modem')}` 筆）", "",
+             f"> 這些表格涵蓋**所有**曾經記錄的樣本；README 上的圖只顯示最近 {WINDOW_H} 小時，"
+             f"所以隨著時間拉長，兩者會逐漸不同。", "",
+             "兩條路徑由同一台主機、在同一輪迴圈中**同時**量測 —— 所以差異來自路徑，不是來自時間點。"
+             "（`2026-08-27 21:02` 之前的樣本是先後量測、相隔約 9 秒，詳見 README。）", "",
+             "| 指標 | 固定制 中位數 | 固定制 p95 | 浮動制 中位數 | 浮動制 p95 |",
              "|---|---|---|---|---|"]
     for field, name in (("sdr_udp_rtt", "Tokyo SDR relay, UDP RTT (ms)"),
                         ("tokyo_avg", "Tokyo SDR relay, ICMP RTT (ms)"),
                         ("cf_avg", "Cloudflare 1.1.1.1 RTT (ms)"),
-                        ("goog_avg", "Google 8.8.8.8 RTT (ms)")):
+                        ("goog_avg", "Google 8.8.8.8 RTT (ms)")):  # 技術名詞保留英文
         a1, a2 = agg(field, "modem", rows), agg(field, "pppoe", rows)
         if a1 and a2:
             lines.append(f"| {name} | {a1[0]:.0f} | {a1[1]:.0f} | {a2[0]:.0f} | {a2[1]:.0f} |")
 
-    lines += ["", "## Paired deltas (dynamic minus static, same loop iteration)", "",
-              "| metric | median | p95 | share of samples where dynamic is worse by >5 ms |",
+    lines += ["", "## 配對差值（浮動制 減 固定制，同一輪迴圈）", "",
+              "| 指標 | 中位數 | p95 | 浮動制較差 >5 ms 的樣本比例 |",
               "|---|---|---|---|"]
     by_ts = {}
     for r in rows:
@@ -280,8 +291,8 @@ def main():
             worse = sum(1 for v in d if v > 5) / len(d) * 100
             lines.append(f"| {name} | {st.median(d):+.0f} ms | {p95:+.0f} ms | {worse:.1f}% |")
 
-    lines += ["", f"_Regenerated automatically from the live probe. Last update: "
-                  f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')} (UTC+8)._"]
+    lines += ["", f"_由運行中的探針自動重新產生。最後更新："
+                  f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}（UTC+8）_"]
     open(os.path.join(OUT, "stats.md"), "w", encoding="utf-8").write("\n".join(lines) + "\n")
     print(f"wrote {OUT}/chart-light.svg, chart-dark.svg, stats.md, paired-scrubbed.csv "
           f"({len(rows)} rows, window {WINDOW_H}h)")

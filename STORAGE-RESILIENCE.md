@@ -1,43 +1,39 @@
-# Surviving a flaky USB SSD on a Raspberry Pi 4
+# 在 Raspberry Pi 4 上跟一顆接觸不良的 USB SSD 共存
 
-The probe host was crashing whenever the desk was bumped. This is what was actually
-wrong, and the three bugs found while proving the fix works — including two that would
-have left the machine dead and unreachable.
+**繁體中文** · [English](STORAGE-RESILIENCE.en.md)
 
-Hardware: RPi 4, DietPi on Debian 13, USB SSD behind a **Realtek RTL9210B-CG**
-(`0bda:9210`), root filesystem on that SSD.
+探針主機只要桌子被碰一下就當機。以下是**真正的原因**，以及在驗證修法的過程中抓到的三個 bug ——
+其中兩個會讓機器直接死掉而且遠端救不回來。
 
-## The four things that were wrong
+硬體：RPi 4、DietPi on Debian 13、USB SSD 後面是 **Realtek RTL9210B-CG**（`0bda:9210`），
+root 檔案系統就放在那顆 SSD 上。
 
-Only the first is obvious.
+## 四個問題，只有第一個是明顯的
 
-**1. Root lived on the removable disk.** A momentary contact glitch on a USB connector
-should cost you a mount. It should not cost you the kernel. With root on the SSD, every
-flicker was fatal.
+**1. root 放在可插拔的磁碟上。** USB 接頭瞬間接觸不良，代價應該是掉一個掛載點，不應該是掉整個
+kernel。root 在 SSD 上時，每一次閃斷都是致命的。
 
-**2. UAS was bound to the bridge.** `/sys/bus/usb/drivers/uas/2-1:1.0`, no quirks set
-anywhere. RPi 4 + RTL9210 + UAS is a well-known stall combination.
+**2. `uas` 驅動綁在橋接器上。** `/sys/bus/usb/drivers/uas/2-1:1.0`，而且沒有設定任何 quirk。
+RPi 4 + RTL9210 + UAS 是一組出了名會 stall 的組合。
 
-**3. USB3 link power management was failing every boot:**
+**3. USB3 link power management 每次開機都協商失敗：**
 
 ```
 usb 2-1: enable of device-initiated U1 failed
 ```
 
-LPM negotiation failing is a classic source of spurious disconnects and is easy to miss
-because the device works anyway.
+LPM 協商失敗是偽掉線的經典來源，而且很容易被忽略 —— 因為裝置**還是能用**。
 
-**4. There was no evidence, and that was structural.** The persistent journal was
-bind-mounted from a directory **on the SSD**, and `/var/log` is a 50 MB tmpfs (DietPi
-ramlog). So when the disk dropped, the log of the disk dropping died with it.
-`journalctl --list-boots` showed one boot. Months of crashes, zero forensics.
+**4. 沒有任何證據，而且這是結構性的問題。** persistent journal 是從**位於 SSD 上**的目錄
+bind mount 過來的，而 `/var/log` 是 50 MB 的 tmpfs（DietPi ramlog）。所以磁碟一掉，記錄「磁碟掉了」
+的那份 log 也跟著死。`journalctl --list-boots` 只看得到一次開機。數個月的當機，**零筆鑑識資料**。
 
-> If you are debugging intermittent storage, check where your logs live **first**.
-> Everything else is guessing until that is fixed.
+> 如果你在追一個間歇性的儲存問題，**第一件事是確認你的 log 放在哪裡**。在那件事修好之前，
+> 其他所有動作都只是在猜。
 
-## The fix
+## 修法
 
-**Invert the roles.** Root on the SD card; the SSD demoted to a `nofail` data mount.
+**把角色對調。** root 放 SD 卡；SSD 降級成 `nofail` 的資料掛載點。
 
 ```
 # /etc/fstab
@@ -45,58 +41,55 @@ PARTUUID=<ssd>  /mnt/ssd  ext4  nofail,noatime,x-systemd.device-timeout=10,x-sys
 /mnt/ssd/var/lib/<app>  /var/lib/<app>  none  bind,nofail,x-systemd.requires=/mnt/ssd  0 0
 ```
 
-Plus `RequiresMountsFor=` on the service that uses the data, so it cannot start against
-an empty mountpoint and quietly corrupt its own state.
+再加上對應服務的 `RequiresMountsFor=`，這樣它就不可能在掛載點是空的情況下啟動，然後默默把自己的
+狀態寫壞。
 
-**Harden the bridge** on the kernel command line:
+**硬化橋接器**，寫在 kernel command line：
 
 ```
-usb-storage.quirks=0bda:9210:u    # IGNORE_UAS -> bulk-only transport
-usbcore.quirks=0bda:9210:k        # NO_LPM -> stop the U1/U2 negotiation that was failing
+usb-storage.quirks=0bda:9210:u    # IGNORE_UAS -> 強制走 bulk-only transport
+usbcore.quirks=0bda:9210:k        # NO_LPM -> 關掉一直協商失敗的 U1/U2
 usbcore.autosuspend=-1
 ```
 
-and give the SCSI layer room to retry instead of giving up, via udev:
+並且透過 udev 給 SCSI 層足夠的重試空間，而不是直接放棄：
 
 ```
 ACTION=="add|change", KERNEL=="sd[a-z]", SUBSYSTEMS=="usb", ATTRS{idVendor}=="0bda", ATTRS{idProduct}=="9210", \
   RUN+="/bin/sh -c 'echo 180 > /sys/block/%k/device/timeout; echo 60 > /sys/block/%k/device/eh_timeout'"
 ```
 
-Confirmation it took effect:
+確認生效的訊息：
 
 ```
 usb 2-1: UAS is ignored for this device, using usb-storage instead
 usb-storage 2-1:1.0: Quirks match for vid 0bda pid 9210: 800000
 ```
 
-and the `U1 failed` line stops appearing. Cost: sequential read drops to ~153 MB/s
-without command queuing. For bulk storage that is a fine trade; it is still several times
-an SD card.
+而且 `U1 failed` 那行不再出現。代價：沒有 command queuing 之後，循序讀取掉到約 153 MB/s。
+對純資料碟來說這個交換很划算，而且仍然是 SD 卡的好幾倍。
 
-> **Order matters.** Apply the USB quirks only *after* root is off the SSD. If bulk-only
-> transport turns out to break your bridge while root still lives on it, the machine will
-> not boot — and you may not be there to fix it.
+> **順序很重要。** USB quirks 一定要等 root 已經搬離 SSD 之後才套用。萬一 bulk-only transport
+> 剛好搞垮你那顆橋接器，而 root 還在上面，機器就開不起來了 —— 而你可能不在現場。
 
-## Three bugs found by actually testing it
+## 三個「真的動手測才會發現」的 bug
 
-None of these show up until you pull the disk. Simulate it at the bus level:
+這些在你真的把碟拔掉之前都不會出現。在 bus 層模擬：
 
 ```
-echo 2-1 > /sys/bus/usb/drivers/usb/unbind    # yank
-echo 2-1 > /sys/bus/usb/drivers/usb/bind      # plug back in
+echo 2-1 > /sys/bus/usb/drivers/usb/unbind    # 拔
+echo 2-1 > /sys/bus/usb/drivers/usb/bind      # 插回去
 ```
 
-**Bug 1 — the bridge does not come back on its own.** After a rebind it re-enumerates
-(`lsusb` sees it, `usb-storage` attaches, a SCSI host is created) and then **no block
-device ever appears**. It loops on:
+**Bug 1 — 橋接器自己回不來。** rebind 之後它會重新列舉（`lsusb` 看得到、`usb-storage` 有掛上、
+SCSI host 有建立），然後**永遠不會出現 block device**。它會卡在：
 
 ```
 usb 2-1: reset SuperSpeed USB device number 2 using xhci_hcd
 ```
 
-A SCSI host rescan (`echo "- - -" > /sys/class/scsi_host/host0/scan`) does **not** fix
-it. What does, reliably, first attempt, every time:
+SCSI host rescan（`echo "- - -" > /sys/class/scsi_host/host0/scan`）**沒有用**。真正有效、
+而且每次第一發就成功的是：
 
 ```
 echo 0 > /sys/bus/usb/devices/2-1/authorized
@@ -104,45 +97,41 @@ sleep 4
 echo 1 > /sys/bus/usb/devices/2-1/authorized
 ```
 
-Deauthorising forces a genuine re-enumeration instead of the half-initialised reset loop.
-This is the single most useful thing in this document.
+取消授權會強迫它做一次**真正的重新列舉**，而不是卡在半初始化的 reset 迴圈裡。
+這是這份文件裡最有用的一件事。
 
-**Bug 2 — the udev rule can never fire.** The obvious trigger is the block device:
+**Bug 2 — udev 規則永遠不可能觸發。** 最直覺的觸發條件是 block device：
 
 ```udev
-ACTION=="add", KERNEL=="sda1", ...        # WRONG
+ACTION=="add", KERNEL=="sda1", ...        # 錯的
 ```
 
-But `sda1` is exactly what recovery has to *create*. Chicken and egg: the rule waits
-forever for the thing it is supposed to produce. Trigger on the USB bridge instead — and
-match `bind` as well as `add`, because a driver-level rebind emits `bind`:
+但 `sda1` 正是復原程序**要製造出來的東西**。雞生蛋蛋生雞：規則永遠在等它自己該產生的東西。
+要改綁在 USB 橋接器上 —— 而且除了 `add` 還要匹配 `bind`，因為 driver 層的 rebind 發的是 `bind`：
 
 ```udev
 ACTION=="add|bind|change", SUBSYSTEM=="usb", ATTR{idVendor}=="0bda", ATTR{idProduct}=="9210", \
   TAG+="systemd", ENV{SYSTEMD_WANTS}+="ssd-recover.service"
 ```
 
-**Bug 3 — systemd start-rate-limiting fights you exactly when it matters.** Default is 5
-starts per 10 s. A flapping connector blows straight through that and systemd then
-*refuses* to start the recovery unit. Set `StartLimitIntervalSec=0`, and take a
-`flock -n` in the script so overlapping triggers step aside instead of fighting over the
-device.
+**Bug 3 — systemd 的啟動速率限制，偏偏在最需要的時候扯後腿。** 預設是 10 秒內 5 次。接觸不良
+造成的抖動會直接衝破這個上限，然後 systemd **拒絕**再啟動復原 unit。要設
+`StartLimitIntervalSec=0`，並且在腳本裡拿 `flock -n`，讓重疊觸發的那幾個自己讓路，而不是一起
+搶同一顆裝置。
 
-## The recovery ladder
+## 復原階梯
 
-[`scripts/ssd-recover.sh`](scripts/ssd-recover.sh), triggered by udev and by a 60 s
-backstop timer:
+[`scripts/ssd-recover.sh`](scripts/ssd-recover.sh)，由 udev 與 60 秒的 backstop timer 觸發：
 
-1. Fast path — already mounted and writable, do nothing.
-2. Stale mount whose device vanished → stop the one service holding handles, then
-   `umount -l`. **Not** `fuser -k -m`, which would take Docker and everything else with it.
-3. Up to 4 attempts of: SCSI rescan → `authorized` toggle → `usb-storage` unbind/rebind.
-4. Mount, then **verify it did not land read-only** and pass a write smoke test. Only if
-   that fails, run `e2fsck -p`; refuse to mount and alert if it returns ≥ 2. Never
-   auto-fsck a healthy disk, and never fsck a half-connected one on a hunch.
-5. Re-bind the data mount, restart the dependent service.
+1. 快速路徑 —— 已經掛好而且可寫，什麼都不做。
+2. 裝置已消失但掛載還在 → 先停掉唯一持有 handle 的那個服務，再 `umount -l`。
+   **不要**用 `fuser -k -m`，那會把 Docker 和其他所有東西一起殺掉。
+3. 最多 4 輪：SCSI rescan → `authorized` toggle → `usb-storage` unbind/rebind。
+4. 掛載，然後**確認沒有掛成唯讀**並通過寫入實測。只有在這一步失敗時才跑 `e2fsck -p`；
+   回傳值 ≥ 2 就拒絕掛載並發出警報。**絕不對健康的碟自動 fsck，也絕不對半連接的碟憑感覺 fsck。**
+5. 重新 bind 資料掛載點，重啟相依的服務。
 
-Measured, hands-off, from a real disconnect:
+實際從一次真實斷線量到的結果，全程無人介入：
 
 ```
 20:07:20  --- trigger=udev ---
@@ -151,26 +140,22 @@ Measured, hands-off, from a real disconnect:
 20:07:42  mounted /mnt/ssd rw -> service restarted -> recovery complete
 ```
 
-22 seconds. During the outage the OS never blinked: root writable, Docker, Home
-Assistant, Tailscale, SSH and the probe all stayed up, systemd unmounted the dead disk
-cleanly with no zombie mount, and the data service stopped itself rather than running
-against an empty directory.
+22 秒。而在整個斷線期間，OS 連眨都沒眨一下：root 可寫，Docker、Home Assistant、Tailscale、SSH
+與探針全部存活，systemd 乾淨地卸載了那顆死掉的碟、沒有殘留殭屍掛載，資料服務也自己停了下來，
+而不是對著一個空目錄繼續跑。
 
-## Two more things worth copying
+## 另外兩件值得抄走的事
 
-**A watchdog you did not check is a watchdog you do not have.** The BCM2835 hardware
-watchdog caps at 15 s — `cat /sys/class/watchdog/watchdog0/timeout`. Request 10 s and
-systemd will report 15 s; request 30 s and you silently get 15 s anyway. Plan around the
-real ceiling.
+**沒驗證過的 watchdog 等於沒有 watchdog。** BCM2835 硬體 watchdog 上限是 15 秒 ——
+`cat /sys/class/watchdog/watchdog0/timeout`。你要求 10 秒，systemd 會回報 15 秒；你要求 30 秒，
+它默默還是給你 15 秒。請照真實的上限規劃。
 
-**Every alert your box can raise dies with the box.** Notifications routed through a
-service running *on* the machine tell you nothing about a power cut, a dead card, or a
-kernel wedge. Add an outbound heartbeat to something external, so silence itself is the
-alert. [`cf-heartbeat/`](cf-heartbeat/) is a small Cloudflare Worker that does this —
-KV for last-seen, a Cron Trigger to notice the silence, Email Routing to send the mail.
+**任何由機器自己發出的警報，都會跟著機器一起死。** 透過跑在**那台機器上**的服務送出的通知，
+對於斷電、卡片掛掉、kernel 卡死這些狀況什麼也告訴不了你。要加一個對外的 heartbeat，讓**沉默本身**
+成為警報。[`cf-heartbeat/`](cf-heartbeat/) 就是做這件事的一個小 Cloudflare Worker：KV 記錄
+last-seen、Cron Trigger 負責察覺沉默、Email Routing 負責寄信。
 
-## What software cannot fix
+## 軟體修不了的部分
 
-The trigger was almost certainly a physically loose connector, and nothing here repairs
-that. What changed is the consequence: a bump used to take down the whole machine
-indefinitely, and now costs one service for 22 seconds. Fix the connector too.
+觸發原因幾乎可以確定是接頭實體鬆動，這裡沒有任何東西能修好它。改變的是**後果**：以前碰一下就
+無限期地整台掛掉，現在的代價是一個服務停 22 秒。**接頭還是要去修。**

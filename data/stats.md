@@ -1,25 +1,25 @@
-# Measured results
+# 量測結果
 
-Whole dataset: `2026-08-26 11:55:50` → `2026-08-27 21:04:09` · **2923 samples** (`1462` per path)
+完整資料集：`2026-08-26 11:55:50` → `2026-08-27 21:24:40` · **2963 筆樣本**（每條路徑 `1482` 筆）
 
-> These tables cover **every** sample ever recorded. The chart in the README shows only the most recent 48 h, so the two will diverge as the run gets longer.
+> 這些表格涵蓋**所有**曾經記錄的樣本；README 上的圖只顯示最近 48 小時，所以隨著時間拉長，兩者會逐漸不同。
 
-Both paths are measured from the same host, concurrently, in the same loop iteration — so any difference is the path, not the moment. (Samples before 2026-08-27 21:02 were taken sequentially, about 9 s apart; see the README.)
+兩條路徑由同一台主機、在同一輪迴圈中**同時**量測 —— 所以差異來自路徑，不是來自時間點。（`2026-08-27 21:02` 之前的樣本是先後量測、相隔約 9 秒，詳見 README。）
 
-| metric | Static IP median | Static IP p95 | Dynamic IP median | Dynamic IP p95 |
+| 指標 | 固定制 中位數 | 固定制 p95 | 浮動制 中位數 | 浮動制 p95 |
 |---|---|---|---|---|
-| Tokyo SDR relay, UDP RTT (ms) | 34 | 34 | 33 | 40 |
-| Tokyo SDR relay, ICMP RTT (ms) | 34 | 34 | 34 | 44 |
-| Cloudflare 1.1.1.1 RTT (ms) | 3 | 3 | 24 | 186 |
+| Tokyo SDR relay, UDP RTT (ms) | 34 | 35 | 33 | 40 |
+| Tokyo SDR relay, ICMP RTT (ms) | 34 | 34 | 34 | 45 |
+| Cloudflare 1.1.1.1 RTT (ms) | 3 | 3 | 24 | 201 |
 | Google 8.8.8.8 RTT (ms) | 2 | 3 | 2 | 14 |
 
-## Paired deltas (dynamic minus static, same loop iteration)
+## 配對差值（浮動制 減 固定制，同一輪迴圈）
 
-| metric | median | p95 | share of samples where dynamic is worse by >5 ms |
+| 指標 | 中位數 | p95 | 浮動制較差 >5 ms 的樣本比例 |
 |---|---|---|---|
-| Tokyo SDR relay, UDP RTT | +0 ms | +6 ms | 5.6% |
-| Tokyo SDR relay, ICMP RTT | +0 ms | +9 ms | 7.5% |
-| Cloudflare 1.1.1.1 RTT | +21 ms | +183 ms | 85.0% |
-| Google 8.8.8.8 RTT | +0 ms | +12 ms | 7.6% |
+| Tokyo SDR relay, UDP RTT | +0 ms | +6 ms | 5.9% |
+| Tokyo SDR relay, ICMP RTT | +0 ms | +9 ms | 7.6% |
+| Cloudflare 1.1.1.1 RTT | +21 ms | +197 ms | 85.2% |
+| Google 8.8.8.8 RTT | +0 ms | +12 ms | 7.7% |
 
-_Regenerated automatically from the live probe. Last update: 2026-08-27 21:06 (UTC+8)._
+_由運行中的探針自動重新產生。最後更新：2026-08-27 21:26（UTC+8）_

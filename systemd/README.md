@@ -1,53 +1,49 @@
-# Unit files, udev rules and the PPPoE hooks
+# unit 檔、udev 規則與 PPPoE hook
 
-The real files from the machine that produced the data, flattened into one directory
-because their install paths differ. Copy each to the path in the table, then
-`systemctl daemon-reload`.
+**繁體中文** · [English](README.en.md)
 
-| File here | Install to |
+這些是從產出這份數據的那台機器上直接取下來的**實際檔案**。因為它們的安裝路徑各不相同，這裡把它們
+攤平放在同一個目錄。請依下表複製到對應位置，然後執行 `systemctl daemon-reload`。
+
+| 這裡的檔名 | 安裝到 |
 |---|---|
-| `netmeasure.service` | `/etc/systemd/system/` — runs `probe.sh` |
-| `netmeasure-ppp.service` | `/etc/systemd/system/` — holds the second PPPoE session up across reboots |
-| `probe-publish.{service,timer}` | `/etc/systemd/system/` — hourly regenerate + push |
-| `heartbeat.{service,timer}` | `/etc/systemd/system/` — outbound dead-man ping |
-| `ssd-recover.{service,timer}` | `/etc/systemd/system/` — USB disk recovery + 60 s backstop |
+| `netmeasure.service` | `/etc/systemd/system/` —— 執行 `probe.sh` |
+| `netmeasure-ppp.service` | `/etc/systemd/system/` —— 讓第二條 PPPoE session 跨重開機存活 |
+| `probe-publish.{service,timer}` | `/etc/systemd/system/` —— 每小時重新產生並推送 |
+| `heartbeat.{service,timer}` | `/etc/systemd/system/` —— 對外的 dead-man 心跳 |
+| `ssd-recover.{service,timer}` | `/etc/systemd/system/` —— USB 磁碟復原與 60 秒 backstop |
 | `systemd-system.conf.d-10-watchdog.conf` | `/etc/systemd/system.conf.d/10-watchdog.conf` |
-| `98-rtl9210-recover.rules` | `/etc/udev/rules.d/` — fire recovery when the bridge enumerates |
-| `99-rtl9210-timeout.rules` | `/etc/udev/rules.d/` — long SCSI timeouts for the bridge |
-| `ppp-peers-measure.example` | `/etc/ppp/peers/<name>` — **edit the `user` line first** |
-| `ppp-ip-up.d-50measure` | `/etc/ppp/ip-up.d/50measure` (must be executable) |
-| `ppp-ip-down.d-50measure` | `/etc/ppp/ip-down.d/50measure` (must be executable) |
+| `98-rtl9210-recover.rules` | `/etc/udev/rules.d/` —— 橋接器一列舉就觸發復原 |
+| `99-rtl9210-timeout.rules` | `/etc/udev/rules.d/` —— 給這顆橋接器較長的 SCSI timeout |
+| `ppp-peers-measure.example` | `/etc/ppp/peers/<name>` —— **先改 `user` 那一行** |
+| `ppp-ip-up.d-50measure` | `/etc/ppp/ip-up.d/50measure`（要可執行） |
+| `ppp-ip-down.d-50measure` | `/etc/ppp/ip-down.d/50measure`（要可執行） |
 
-## Before you enable any of it
+## 啟用之前務必確認
 
-- **The PPPoE password is not here and must not be.** Put the credential in
-  `/etc/ppp/pap-secrets` (mode 600) yourself. Nothing in this repo reads or writes it.
-- **`nodefaultroute` is load-bearing.** Without it the measurement session takes over the
-  default route and your whole household starts using it.
-- **Check the interface names.** `nic-eth0` in the peers file, and `eth0` / `ppp0` in
-  `probe.sh`, are specific to this box.
-- **The udev rules hard-code `0bda:9210`** (Realtek RTL9210). Change the IDs for your
-  bridge, or drop the rules if your disk is not USB.
-- `ssd-recover.sh` and `root-backup.sh` call `/usr/local/sbin/ha-alert.sh` (Home
-  Assistant notification) and `/usr/local/sbin/io-health.sh` (SMART/dmesg check). Those
-  are host-specific and not included. `ha-alert.sh` is guarded by `[ -x ]` and simply
-  does nothing if absent; **`io-health.sh` is not** — either supply one or delete that
-  line from `root-backup.sh` before using it.
-- `root-backup.sh` assumes the layout described in
-  [`../STORAGE-RESILIENCE.md`](../STORAGE-RESILIENCE.md): root on the SD card, the USB
-  disk mounted `nofail` at `/mnt/ssd`. It refuses to run otherwise, but read it before
-  trusting it with your filesystem — it uses `rsync --delete` against a destination that
-  also holds live data.
+- **PPPoE 密碼不在這裡，也不該在這裡。** 請自己把帳密寫進 `/etc/ppp/pap-secrets`（mode 600）。
+  這個 repo 裡沒有任何東西會讀取或寫入它。
+- **`nodefaultroute` 是關鍵。** 少了它，量測用的 session 會接管預設路由，整個家裡的流量都會改走它。
+- **檢查介面名稱。** peers 檔裡的 `nic-eth0`，以及 `probe.sh` 裡的 `eth0` / `ppp0`，都是這台機器
+  專屬的。
+- **udev 規則寫死了 `0bda:9210`**（Realtek RTL9210）。請改成你自己橋接器的 ID，或者如果你的碟不是
+  USB 就直接刪掉這兩條規則。
+- `ssd-recover.sh` 與 `root-backup.sh` 會呼叫 `/usr/local/sbin/ha-alert.sh`（Home Assistant 通知）
+  與 `/usr/local/sbin/io-health.sh`（SMART / dmesg 檢查）。這兩支是主機專屬的，**沒有包含在這裡**。
+  `ha-alert.sh` 有 `[ -x ]` 保護，不存在就自動跳過；**`io-health.sh` 沒有** —— 你得自己補一支，
+  或是在使用 `root-backup.sh` 之前把那一行刪掉。
+- `root-backup.sh` 假設的佈局寫在 [`../STORAGE-RESILIENCE.md`](../STORAGE-RESILIENCE.md)：root 在
+  SD 卡、USB 碟以 `nofail` 掛在 `/mnt/ssd`。不符合就會拒絕執行，但**在把檔案系統交給它之前請先讀過**
+  —— 它用的是 `rsync --delete`，而目的地上同時放著活資料。
 
-## Sanity check after installing
+## 安裝後的檢查
 
 ```sh
 systemctl status netmeasure netmeasure-ppp
-ip rule show | grep 200          # the policy rule
-ip route show table 200          # must show a default route, or nothing is measured
+ip rule show | grep 200          # policy 規則
+ip route show table 200          # 一定要看到 default route，否則根本沒在量第二條路徑
 tail -3 /root/netmeasure/paired.csv
 ```
 
-Two rows per timestamp, with two different source addresses, means it is working. Two
-rows with the *same* source address means the policy route is not in effect and you are
-measuring one path twice.
+**同一個時間戳有兩列、而且來源位址不同** → 正常運作。
+**兩列的來源位址相同** → policy route 沒生效，你正在把同一條路徑量兩次。

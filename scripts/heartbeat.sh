@@ -26,7 +26,10 @@ QBT=$(systemctl is-active qbittorrent 2>/dev/null)
 HA=$(curl -s -o /dev/null -m 8 -w '%{http_code}' http://127.0.0.1:8123/ 2>/dev/null)
 FAILED=$(systemctl --failed --no-legend --no-pager 2>/dev/null | wc -l)
 ROOTPCT=$(df --output=pcent / 2>/dev/null | tail -1 | tr -d ' %')
-RECOV=$(grep -c 'recovery complete' /var/lib/ssd-recover.log 2>/dev/null || echo 0)
+# grep -c prints 0 AND exits 1 when there are no matches, so the || fallback fired on
+# top of the zero it had already printed, so RECOV ended up as two lines, not one.
+RECOV=$(grep -c 'recovery complete' /var/lib/ssd-recover.log 2>/dev/null)
+RECOV=${RECOV:-0}
 UP=$(uptime -p 2>/dev/null)
 
 BODY="root=$ROOTSRC ssd=$SSD qbt=$QBT ha_http=$HA failed_units=$FAILED root_used=${ROOTPCT}% ssd_recoveries=$RECOV $UP"

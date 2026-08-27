@@ -1,179 +1,188 @@
-# Does a static IP actually make your game ping better?
+# 固定 IP 真的能讓遊戲 ping 變低嗎？
 
-A live, concurrent A/B of two ISP account types on the same line, measured from one
-Raspberry Pi — including a way to measure the **actual UDP path a Source 2 game uses**,
-not just ICMP to something nearby.
+**繁體中文** · [English](README.en.md)
 
-Short answer for the impatient: **for the game path, no. For everything behind
-Cloudflare, dramatically yes.** The data below is regenerated hourly from a probe that
-is still running.
+同一條線路上，兩種 ISP 帳號型態的**同步 A/B 對照**，全部從一台 Raspberry Pi 量測 —— 而且量的是
+**Source 2 遊戲真正在走的 UDP 路徑**，不是隨便 ping 一個附近的 DNS。
+
+給沒耐心的人的結論：**對遊戲路徑而言，沒有。對 Cloudflare 後面的東西而言，差非常多。**
+下面的數據由仍在運行的探針每小時自動更新。
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="data/chart-dark.svg">
-  <img alt="Latency and packet loss over time on two ISP paths measured simultaneously" src="data/chart-light.svg">
+  <img alt="兩條 ISP 路徑同時量測的延遲與封包遺失時序圖" src="data/chart-light.svg">
 </picture>
 
-Full numbers, always current: **[data/stats.md](data/stats.md)** · raw samples:
+完整數字（隨時更新）：**[data/stats.md](data/stats.md)** · 原始樣本：
 [data/paired-scrubbed.csv](data/paired-scrubbed.csv)
 
 ---
 
-## Why this exists
+## 為什麼做這件事
 
-CS2 was spiking to 200 ms on an otherwise idle connection. The obvious suspects —
-server picker, DNS, Wi-Fi — were all wrong. Traceroute eventually showed ICMP
-`type 11 time-exceeded` from a routing loop between the ISP (HiNet, AS3462) and
-Cloudflare (AS13335), with traffic detouring internationally instead of peering locally.
+CS2 在一條沒有其他負載的線路上，ping 會突然衝到 200 ms。常見的嫌疑犯 —— server picker、DNS、
+Wi-Fi —— 查完全都不是。最後 traceroute 抓到 ICMP `type 11 time-exceeded`，是 HiNet（AS3462）與
+Cloudflare（AS13335）之間的一個 routing loop：流量沒有在本地對接，而是繞去國外。
 
-The ISP offers a free switch from a dynamic-IP account to a static-IP one. The obvious
-question — *does that actually change the route?* — turns out to be surprisingly hard to
-answer honestly, and most of the advice online is people comparing a speed test today
-against their memory of last week.
+中華電信提供從浮動制免費換成固定制。於是問題很自然：**換了之後，路由真的會改變嗎？**
 
-## What makes this measurement different
+這個問題出乎意料地難誠實回答。網路上絕大多數的說法，都是拿今天的測速結果，去比對自己對上週的印象。
 
-**Two problems with the naive A/B, and how each is fixed.**
+## 這份量測跟一般做法差在哪
 
-### 1. Sequential comparison is worthless
+**天真的 A/B 有兩個致命問題，以下是各自的解法。**
 
-Switch the account type, re-run the test, compare. This measures *when you tested*, not
-*what you changed* — transient ISP faults clear on their own and get credited to
-whatever you did last. An earlier version of this experiment produced a confident
-conclusion this way. It was wrong, and the next day's data contradicted it.
+### 問題一：先後測量根本沒有意義
 
-The fix: a single host holds **both account types up at once**. The primary path is the
-router's normal connection; the second is a PPPoE session dialled by the Pi itself with
-`nodefaultroute`, kept off the default route and reachable only through a policy-routing
-rule. Every loop iteration measures both **concurrently**, so whatever transient hits the
-line hits both paths at once and cancels out of the comparison.
+換帳號型態、重測一次、比較結果 —— 這量到的是**你何時測**，不是**你改了什麼**。ISP 的暫時性
+故障本來就會自己好，然後功勞就記在你最後做的那件事上。
 
-> **Correction, and a warning if you copy this.** The first version of `probe.sh` measured
-> the two paths one after the other — 8.6 s and 10.4 s respectively — while stamping both
-> rows with the loop-start time. The CSV *looked* simultaneous and was about 9 s apart.
-> Samples before `2026-08-27 21:02` carry that offset. It is far too small to explain the
-> Cloudflare result (a 20× difference sustained for hours) but it was an overstatement,
-> and a shared timestamp column is a very easy way to fool yourself.
+這個實驗的早期版本就是這樣做的，也因此得出了一個很有信心的結論。**那個結論是錯的**，隔天的
+數據就打臉了。
+
+解法：讓**同一台主機同時持有兩種帳號型態**。第一條是 router 原本的連線；第二條是 Pi 自己撥的
+PPPoE session，加上 `nodefaultroute`，讓它永遠不會變成系統預設路由，只能透過 policy routing
+規則抵達。每一輪迴圈**同時**量測兩條路徑，所以任何打到線路上的暫時性干擾會同時打到兩邊，在比較
+中互相抵銷。
+
+> **更正，也是給要照抄的人的警告。** `probe.sh` 的第一版是**先後**量測兩條路徑 —— 分別耗時
+> 8.6 秒與 10.4 秒 —— 卻把兩列都蓋上迴圈開始時的時間戳。CSV **看起來**是同步的，實際相隔約 9 秒。
+> `2026-08-27 21:02` 之前的樣本都帶著這個偏移。這個偏移遠不足以解釋 Cloudflare 的結果（持續數
+> 小時的 20 倍差距），但它確實是誇大的說法 —— 而共用時間戳這一欄，是非常容易騙到自己的做法。
 
 ```sh
 # /etc/ppp/peers/<name>
-nodefaultroute          # the measurement session must never become the system default
+nodefaultroute          # 量測用的 session 絕對不能變成系統預設路由
 
-# /etc/ppp/ip-up.d/50measure   ($1=iface $4=local IP $6=ipparam)
+# /etc/ppp/ip-up.d/50measure   （$1=介面 $4=本地 IP $6=ipparam）
 [ "$6" = "measure" ] || exit 0
-ip route replace default dev "$1" table 200      # <- without this the rule does nothing
+ip route replace default dev "$1" table 200      # <- 少了這行，上面那條規則什麼也不會做
 ip rule del priority 200 2>/dev/null
 ip rule add from "$4" lookup 200 priority 200
 ```
 
-Both halves are needed: the `ip rule` sends traffic *sourced from* the second session to
-table 200, and the `ip route` is what gives table 200 somewhere to send it. With only the
-rule, lookups fall through to the main table and you silently measure the same path twice —
-which is exactly the failure that made the first attempt at this experiment worthless.
+**兩半缺一不可**：`ip rule` 負責把「來源是第二條 session」的流量送進 table 200，而 `ip route`
+才是讓 table 200 知道要往哪送。只有 rule 沒有 route，查表會落回 main table，於是你會**在毫無察
+覺的情況下，把同一條路徑量了兩次** —— 這正是這個實驗第一次嘗試失敗、數據完全作廢的原因。
 
-The Pi is not a router and does not carry household traffic. It only holds a second
-session so the two paths can be compared fairly.
+這台 Pi **不是** router，也不承載家裡的流量。它只是多持有一條 session，好讓兩條路徑能被公平比較。
 
-### 2. ICMP to 1.1.1.1 is not the path your game uses
+### 問題二：ping 1.1.1.1 量到的不是你遊戲在走的路
 
-Games on Valve's Steam Datagram Relay send **UDP to a relay**, not ICMP to a DNS
-resolver. Those can take different physical links — ECMP hashes on the 5-tuple, so even
-two UDP flows can diverge. Pinging Cloudflare tells you about the Cloudflare path and
-nothing more.
+跑在 Valve **Steam Datagram Relay（SDR）** 上的遊戲，送的是**到 relay 的 UDP**，不是到 DNS
+resolver 的 ICMP。這兩者可能走在不同的實體鏈路上 —— ECMP 是對 5-tuple 做 hash，所以連兩條 UDP
+flow 都可能分岔。ping Cloudflare 只能告訴你 Cloudflare 那條路的狀況，其他什麼都說明不了。
 
-**The useful trick:** an SDR relay replies to a junk UDP datagram on its game port.
-Send 32 random bytes to a relay on `27015–27060` and it answers:
+**有用的小技巧：SDR relay 會回應丟到它遊戲埠上的垃圾 UDP 封包。** 對 relay 的 `27015–27060`
+送 32 個隨機位元組，它會回：
 
 ```
 Invalid/unknown MsgID 0
 ```
 
-That is a full round trip on the exact transport the game uses, from a plain socket, with
-no game running and no client library. [`scripts/sdrping.py`](scripts/sdrping.py) does
-this and prints `avg_rtt,loss`.
+這就是一次完整的 round trip，走在**遊戲實際使用的那個 transport 上**，用一個普通 socket 就能做到，
+不需要開遊戲，也不需要任何 client library。[`scripts/sdrping.py`](scripts/sdrping.py) 做的就是
+這件事，輸出 `avg_rtt,loss`。
 
-**Caveat that matters:** the RTT is trustworthy, the loss figure is not. The relay
-silently ignores a fraction of junk datagrams — 16–33% no-reply at every send interval
-tested (0.12 s, 0.35 s, 0.8 s) while RTT stayed flat at 33.2–33.5 ms. It is rate-limiting
-nonsense traffic, which is entirely reasonable of it. **Use this for latency, never for
-packet loss.**
+**必須注意的限制：RTT 可信，loss 不可信。** relay 會默默忽略一部分垃圾封包 —— 在測過的每一種
+發送間隔（0.12 秒、0.35 秒、0.8 秒）下都有 16–33% 沒有回應，而同時 RTT 穩定維持在 33.2–33.5 ms。
+它在對無意義的流量做 rate limiting，這完全合理。**所以這個方法只能拿來看延遲，絕不能拿來算封包
+遺失率。**
 
-Relay addresses come from Valve's own endpoint:
+relay 位址來自 Valve 自己的 endpoint：
 
 ```
 https://api.steampowered.com/ISteamApps/GetSDRConfig/v1/?appid=730
 ```
 
-## What the data says
+## 數據說了什麼
 
-See [data/stats.md](data/stats.md) for live figures. The shape of the result:
+即時數字見 [data/stats.md](data/stats.md)。結果的形狀是這樣：
 
-| | Static IP | Dynamic IP |
+| | 固定制（Static IP） | 浮動制（Dynamic IP） |
 |---|---|---|
-| **Game path** (Tokyo SDR relay, UDP) | median ~34 ms | median ~34 ms — **paired delta ≈ 0 ms** |
-| Game path p95 | flat, ≈ the median | wanders 38–52 ms |
-| **Cloudflare 1.1.1.1** | 3 ms, unwavering | 24 ms baseline, **200 ms+ under evening load, with packet loss** |
+| **遊戲路徑**（Tokyo SDR relay, UDP） | 中位數 ~34 ms | 中位數 ~34 ms — **配對差值 ≈ 0 ms** |
+| 遊戲路徑 p95 | 平的，幾乎等於中位數 | 在 38–52 ms 之間游移 |
+| **Cloudflare 1.1.1.1** | 3 ms，紋風不動 | 基線 24 ms，**傍晚滿載時 200 ms 以上，並伴隨封包遺失** |
 
-So:
+所以：
 
-- **The static IP does not lower game ping.** The median difference on the actual game
-  transport is zero. Anyone claiming a static IP "gives you better ping" is not measuring
-  the game path.
-- **It does remove jitter.** The static path's p95 equals its median hour after hour; the
-  dynamic path's does not. For a twitch shooter that is worth more than a few ms of
-  average.
-- **The Cloudflare fault only exists on the dynamic path.** Whatever the routing problem
-  is, the two account pools are not handled identically, and only one of them detours.
+- **固定制不會讓遊戲 ping 變低。** 在真正的遊戲 transport 上，中位數差值是零。任何宣稱「固定 IP
+  能給你更好的 ping」的說法，都沒有在量遊戲路徑。
+- **但它確實消除了抖動。** 固定制的 p95 一個小時接著一個小時等於它自己的中位數；浮動制做不到。
+  對一款需要瞬間反應的射擊遊戲來說，這比平均值少個幾 ms 有價值得多。
+- **Cloudflare 的故障只存在於浮動制。** 不論那個 routing 問題的成因是什麼，兩個帳號池顯然沒有被
+  同等對待，而且只有其中一個會繞路。
 
-### What this does *not* show
+### 這份數據**不能**證明什麼
 
-- The relay→game-server leg is invisible here. Of ~82 ms observed in-game, the probe can
-  only see ~33 ms of it. A clean probe during a bad game would point at that leg.
-- One line, one ISP, one city. This is a method you can re-run, not a general claim about
-  static IPs.
-- Two nights of peak-hour data at the time of writing, one of which was lost to an
-  unrelated hardware failure (see below). The Cloudflare result is unambiguous; treat the
-  jitter result as directional.
+- relay 到遊戲伺服器那一段是看不到的。遊戲內觀測到的約 82 ms 裡，探針只能看到約 33 ms。如果某次
+  遊戲很卡但探針全程乾淨，那就指向那一段。
+- 一條線路、一家 ISP、一個城市。這是一套**你可以自己重跑的方法**，不是對固定 IP 的通則性結論。
+- 撰寫當下只有兩個晚上的尖峰時段數據，其中一晚還因為一次無關的硬體故障整段遺失（見下）。
+  Cloudflare 的結果是明確的；抖動的結論請當作**方向性**參考。
 
-## Repo layout
 
-| Path | What it is |
+## 為什麼 Valorant 不受這個問題影響
+
+同一條線路、同一個晚上，CS2 在飆 ping 的時候 Valorant 通常沒事。原因不是玄學，是兩家公司把流量
+交給網際網路的方式根本不同。
+
+| | CS2（Valve SDR） | Valorant（Riot） |
+|---|---|---|
+| 傳輸網路 | Steam Datagram Relay，走公開網際網路的 transit 到 relay | **Riot Direct**（AS6507），Riot 自建的私有骨幹 |
+| 在台灣的接入 | 依 relay 選擇與當下的 BGP 路由而定 | 在 **TPIX（台北網際網路交換中心）** 有 PoP 並與本地 ISP 直接對接 |
+| 遊戲流量會經過 Cloudflare 嗎 | 可能 —— 這正是本專案抓到的故障 | **不會**。Cloudflare 只可能出現在網站、登入等應用層 |
+| 伺服器位置 | 依 relay 而定（本專案量東京） | 香港 / 東京 / 新加坡，經 Riot 自己的骨幹回傳 |
+
+關鍵在於：**HiNet 與 Cloudflare 之間沒有良好的本地對接**，所以流量會繞去國外；而 **Riot 有在
+TPIX 落地**，封包從 HiNet 出去就直接交給 Riot Direct，之後全程走 Riot 自己的線路到香港或東京。
+一個踩得到那個 routing loop，另一個根本不經過。
+
+> **講清楚界線**：本專案的探針**沒有量 Valorant**。上面說的是「為什麼這個故障機制在架構上碰不到
+> Valorant」，不是量測結果。
+
+順帶一提，這次調查過程中，Valorant 確實出現過一次明顯的不穩定 —— 追出來的原因是 **Steam 正在背景
+下載遊戲把上行塞滿**，跟路由完全無關。停掉下載就正常了。**同一款遊戲卡頓，可以有完全不同的成因；
+先量，再下結論。**
+
+## 檔案結構
+
+| 路徑 | 內容 |
 |---|---|
-| `scripts/probe.sh` | the sampling loop: both paths, every ~45 s, one CSV row each |
-| `scripts/sdrping.py` | UDP RTT against a Steam Datagram Relay — the interesting bit |
-| `scripts/hoptrace.sh` | hop-by-hop trace via plain `ping -t`, for when `mtr` is broken |
-| `scripts/udptrace.py` | UDP traceroute matching returned ICMP by source port |
-| `tools/gen_report.py` | CSV → charts + stats, stdlib only, runs on the Pi |
-| `tools/publish.sh` | regenerate and push, on a timer |
-| `cf-heartbeat/` | a Cloudflare Worker dead-man switch for the probe host |
-| `systemd/` | the actual unit files, udev rules and PPPoE hooks, with install paths |
+| `scripts/probe.sh` | 取樣迴圈：兩條路徑同時量，每約 45 秒各寫一列 CSV |
+| `scripts/sdrping.py` | 對 Steam Datagram Relay 的 UDP RTT —— 最有趣的部分 |
+| `scripts/hoptrace.sh` | 用純 `ping -t` 做逐跳追蹤，給 `mtr` 壞掉時用 |
+| `scripts/udptrace.py` | UDP traceroute，用來源埠比對回傳的 ICMP |
+| `tools/gen_report.py` | CSV → 圖表與統計，只用標準函式庫，直接跑在 Pi 上 |
+| `tools/publish.sh` | 重新產生並推送，由 timer 觸發 |
+| `cf-heartbeat/` | 給探針主機用的 Cloudflare Worker dead-man switch |
+| `systemd/` | 實際的 unit 檔、udev 規則與 PPPoE hook，附安裝路徑 |
 
-`mtr` is unusable on this box in both ICMP and UDP modes (hop 1, then `???` forever),
-hence the hand-rolled tracers. If yours works, use it.
+`mtr` 在這台機器上無論 ICMP 或 UDP 模式都不能用（只出得來第一跳，之後全是 `???`），所以才會有那些
+手刻的 tracer。你的能用就用你的。
 
-## The hardware detour
+## 中途的硬體插曲
 
-Halfway through, the probe host started crashing whenever the desk was bumped. Root
-lived on a USB SSD, so a momentary contact glitch killed the whole OS — and took 13
-hours of peak-hour data with it, which is the gap you can see in the chart.
+做到一半，探針主機開始只要桌子被碰一下就當機。root 放在 USB SSD 上，所以一瞬間的接觸不良就會
+殺掉整個 OS —— 順便帶走 13 小時的尖峰時段數據，也就是圖上那個缺口。
 
-The fix, and the three bugs found while proving it works, are written up separately:
-**[STORAGE-RESILIENCE.md](STORAGE-RESILIENCE.md)**. Short version: root moved to the SD
-card, the SSD became a `nofail` mount, and a recovery ladder brings it back in 22
-seconds without human hands. Relevant to anyone running a Pi on a USB SSD with a Realtek
-RTL9210 bridge, which is a lot of people.
+修法，以及在驗證過程中抓到的三個 bug，另外寫在
+**[STORAGE-RESILIENCE.md](STORAGE-RESILIENCE.md)**。簡短版：root 搬到 SD 卡，SSD 降級成
+`nofail` 掛載，再加一套復原階梯，能在 22 秒內自己把它救回來，全程不需要人。對任何把 Pi 的 root
+放在 Realtek RTL9210 橋接器後面的 USB SSD 上的人都適用 —— 這種人不少。
 
-## Reproducing this
+## 自己重現一次
 
-1. Get relay addresses for your region from `GetSDRConfig` above.
-2. Point `scripts/sdrping.py` at one and confirm you get `Invalid/unknown MsgID 0` back.
-3. If your ISP offers a second account type, dial it with `nodefaultroute` + a policy
-   route so it never touches your default path.
-4. Run `scripts/probe.sh` under systemd and leave it alone for several days, **including
-   evenings** — off-peak data will tell you nothing.
+1. 從上面的 `GetSDRConfig` 取得你所在區域的 relay 位址。
+2. 把 `scripts/sdrping.py` 指過去，確認你收得到 `Invalid/unknown MsgID 0`。
+3. 如果你的 ISP 也提供第二種帳號型態，用 `nodefaultroute` 加 policy route 撥起來，確保它碰不到
+   你的預設路徑。
+4. 用 systemd 跑 `scripts/probe.sh`，然後放著幾天不要管它 —— **一定要包含晚上**，離峰時段的數據
+   什麼也證明不了。
 
-The whole thing is a few hundred lines of shell and stdlib Python on hardware that was
-already running.
+整套東西不過是幾百行 shell 加標準函式庫的 Python，跑在一台本來就開著的機器上。
 
-## Licence
+## 授權
 
-MIT. See [LICENSE](LICENSE).
+MIT，見 [LICENSE](LICENSE)。
