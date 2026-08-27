@@ -49,6 +49,8 @@ chmod 600 /etc/heartbeat.url
 /usr/local/sbin/heartbeat.sh && echo sent
 ```
 
+**`/etc/heartbeat.url` 一行放一個 URL。** 多寫幾行就是備援 —— 它們是同一個 Worker 的等價端點，第一個成功送出的就算數。這樣一來，某個主機名被 DNS 問題、網域到期或企業防火牆擋掉時，警報不會跟著消失。建議至少放兩個：`*.workers.dev` 一個，自己網域一個。
+
 `heartbeat.timer` 已經安裝並啟用，每 5 分鐘觸發一次。在 `/etc/heartbeat.url` 出現之前，腳本會直接
 以 rc=0 結束、什麼也不做 —— 所以就算你一直沒設定完，也不會有任何東西壞掉。
 

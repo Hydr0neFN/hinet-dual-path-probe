@@ -52,6 +52,8 @@ chmod 600 /etc/heartbeat.url
 /usr/local/sbin/heartbeat.sh && echo sent
 ```
 
+**`/etc/heartbeat.url` takes one URL per line.** Extra lines are failover — they are equivalent endpoints for the same Worker, and the first one that accepts the ping wins. That way a DNS problem, an expired domain or a network that blanket-blocks one hostname cannot silence the alarm. Two is a sensible minimum: one `*.workers.dev`, one on your own domain.
+
 `heartbeat.timer` is already installed and enabled on the Pi and fires every 5 minutes.
 Until `/etc/heartbeat.url` exists the script exits 0 and does nothing, so nothing breaks
 if you never finish this.
