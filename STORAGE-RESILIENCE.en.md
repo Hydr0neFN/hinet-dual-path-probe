@@ -1,6 +1,6 @@
 # Surviving a flaky USB SSD on a Raspberry Pi 4
 
-**English** · [繁體中文](STORAGE-RESILIENCE.en.md)
+**English** · [繁體中文](STORAGE-RESILIENCE.md)
 
 The probe host was crashing whenever the desk was bumped. This is what was actually
 wrong, and the three bugs found while proving the fix works — including two that would
