@@ -199,11 +199,11 @@ Halfway through, the probe host started crashing whenever the desk was bumped. R
 lived on a USB SSD, so a momentary contact glitch killed the whole OS — and took 13
 hours of peak-hour data with it, which is the gap you can see in the chart.
 
-The fix, and the three bugs found while proving it works, are written up separately:
-**[STORAGE-RESILIENCE.md](STORAGE-RESILIENCE.en.md)**. Short version: root moved to the SD
-card, the SSD became a `nofail` mount, and a recovery ladder brings it back in 22
-seconds without human hands. Relevant to anyone running a Pi on a USB SSD with a Realtek
-RTL9210 bridge, which is a lot of people.
+The fix, and the three bugs found while proving it works, now live in their own
+repository: **[rpi4-usb-ssd-resilience](https://github.com/Hydr0neFN/rpi4-usb-ssd-resilience)**. Short version: root moved to the SD card,
+the SSD became a `nofail` mount, and a recovery ladder brings it back in 22 seconds
+without human hands. Relevant to anyone running a Pi on a USB SSD with a Realtek RTL9210
+bridge, which is a lot of people.
 
 ## Reproducing this
 

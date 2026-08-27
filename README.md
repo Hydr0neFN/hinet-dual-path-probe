@@ -144,9 +144,7 @@ https://api.steampowered.com/ISteamApps/GetSDRConfig/v1/?appid=730
 
 實驗做到一半，探針主機只要桌子被稍微碰一下就直接當機。因為 root 整個放在外接 USB SSD 上，接頭只要瞬間接觸不良，整個 OS 就直接掛掉——順便蒸發了 13 小時的尖峰時段數據，圖表上那個斷層就是這樣來的。
 
-完整的修法，以及我在驗證過程中踩到的三個 bug，另外寫在
-**[STORAGE-RESILIENCE.md](STORAGE-RESILIENCE.md)**。懶人包：把 root 搬回 SD 卡，SSD 降級成
-帶有 `nofail` 的資料掛載點，再加上一套自動復原機制，斷線時能在 22 秒內自動自救掛載回來，全程不需要人工介入。這套解法適用於所有把 Raspberry Pi 的 root 跑在 Realtek RTL9210 橋接器外接 SSD 上的苦主（相信遇到的人絕對不少）。
+完整的修法，以及我在驗證過程中踩到的三個 bug，已獨立整理至專案 **[rpi4-usb-ssd-resilience](https://github.com/Hydr0neFN/rpi4-usb-ssd-resilience)**。懶人包：把 root 搬回 SD 卡，SSD 降級成帶有 `nofail` 的資料掛載點，再加上一套自動復原機制，斷線時能在 22 秒內自動自救掛載回來，全程不需要人工介入。這套解法適用於所有把 Raspberry Pi 的 root 跑在 Realtek RTL9210 橋接器外接 SSD 上的苦主（相信遇到的人絕對不少）。
 
 ## 自己重現一次
 
