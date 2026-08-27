@@ -1,9 +1,9 @@
-# Does a static IP actually make your game ping better?
+# CHT Static vs. Dynamic IP Ping Comparison for CS2
 
 **English** · [繁體中文](README.md)
 
 A live, concurrent A/B of two ISP account types on the same line, measured from one
-Raspberry Pi — including a way to measure the **actual UDP path a Source 2 game uses**,
+Raspberry Pi — including a way to measure the **actual UDP path a Source 2 game (CS2, in this case) uses**,
 not just ICMP to something nearby.
 
 Short answer for the impatient: **for the game path, no. For everything behind
