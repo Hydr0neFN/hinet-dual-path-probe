@@ -107,11 +107,25 @@ That is a full round trip on the exact transport the game uses, from a plain soc
 no game running and no client library. [`scripts/sdrping.py`](scripts/sdrping.py) does
 this and prints `avg_rtt,loss`.
 
-**Caveat that matters:** the RTT is trustworthy, the loss figure is not. The relay
-silently ignores a fraction of junk datagrams — 16–33% no-reply at every send interval
-tested (0.12 s, 0.35 s, 0.8 s) while RTT stayed flat at 33.2–33.5 ms. It is rate-limiting
-nonsense traffic, which is entirely reasonable of it. **Use this for latency, never for
-packet loss.**
+**Important limitation: RTT data is reliable, but packet loss is not a usable metric.** SDR relays silently drop a portion of invalid packets — whether the send interval is set to 0.12 s, 0.35 s, or 0.8 s, 16–33% of packets receive no response, while RTT consistently stays solid at 33.2–33.5 ms.
+
+Initially, because the unresponded ratio appeared similar across all three intervals, it was misinterpreted as relays simply not guaranteeing responses to garbage packets rather than rate limiting. However, this assumption has been disproven by new test data — it is indeed rate limiting.
+
+Rate scan results from 2026-08-28 (same probe, same relay `45.121.184.27:27023`):
+
+| Send Rate | Duration | Sent | Responses Received |
+|---|---|---|---|
+| 1 pps | 12 s | 12 | 9 |
+| 2 pps | 24 s | 24 | 9 |
+| 5 pps | 60 s | 60 | 13 |
+| 10 pps | 120 s | 120 | 12 |
+| 20 pps | 240 s | 240 | 12 |
+
+Key observation: **No matter how fast or how long packets are sent, the number of responses received is always capped between 9 and 13.** This is a classic token bucket mechanism: there is a small initial burst allowance (around 10 packets), after which the refill rate is extremely slow (roughly 0.05–0.1 per second).
+
+This also explains why the original 0.12 / 0.35 / 0.8 s intervals showed "similar ratios" — those tests were short bursts sending 8 packets over a 45-second cycle, which fell entirely within the bucket capacity, masking any rate-limiting effects.
+
+**Therefore, this tool must only be used to measure latency (RTT), and should never be used as an indicator of packet loss.**
 
 Relay addresses come from Valve's own endpoint:
 
