@@ -1,0 +1,16 @@
+# measurement-only PPPoE session. MUST NOT take over the default route.
+plugin rp-pppoe.so
+nic-eth0
+user "YOUR-ACCOUNT@YOUR-ISP"   # the measurement account
+noipdefault
+noauth
+hide-password
+nodefaultroute
+mtu 1492
+mru 1492
+persist
+maxfail 0
+holdoff 5
+lcp-echo-interval 20
+lcp-echo-failure 3
+ipparam measure

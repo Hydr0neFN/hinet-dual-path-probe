@@ -1,0 +1,5 @@
+# The SSD block device is what recovery CREATES, so it cannot be the only trigger.
+# A driver-level rebind emits "bind", not "add", so both actions must be matched or the
+# udev path silently misses and recovery falls back to the 60s timer.
+ACTION=="add|bind|change", SUBSYSTEM=="usb", ATTR{idVendor}=="0bda", ATTR{idProduct}=="9210", TAG+="systemd", ENV{SYSTEMD_WANTS}+="ssd-recover.service"
+ACTION=="add|bind", SUBSYSTEM=="usb", DRIVER=="usb-storage", ATTRS{idVendor}=="0bda", ATTRS{idProduct}=="9210", TAG+="systemd", ENV{SYSTEMD_WANTS}+="ssd-recover.service"

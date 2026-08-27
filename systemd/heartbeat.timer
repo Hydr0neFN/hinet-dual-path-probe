@@ -1,0 +1,10 @@
+[Unit]
+Description=Send a heartbeat every 5 minutes
+
+[Timer]
+OnBootSec=90s
+OnUnitActiveSec=5min
+AccuracySec=30s
+
+[Install]
+WantedBy=timers.target

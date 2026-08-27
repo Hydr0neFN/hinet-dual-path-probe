@@ -145,6 +145,7 @@ So:
 | `tools/gen_report.py` | CSV → charts + stats, stdlib only, runs on the Pi |
 | `tools/publish.sh` | regenerate and push, on a timer |
 | `cf-heartbeat/` | a Cloudflare Worker dead-man switch for the probe host |
+| `systemd/` | the actual unit files, udev rules and PPPoE hooks, with install paths |
 
 `mtr` is unusable on this box in both ICMP and UDP modes (hop 1, then `???` forever),
 hence the hand-rolled tracers. If yours works, use it.

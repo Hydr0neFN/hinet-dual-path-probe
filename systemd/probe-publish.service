@@ -1,0 +1,9 @@
+[Unit]
+Description=Regenerate the probe report and push it to GitHub
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/root/pi-probe-repo/tools/publish.sh
+TimeoutStartSec=600

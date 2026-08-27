@@ -1,0 +1,11 @@
+[Unit]
+Description=Recover USB SSD mount after an intermittent disconnect
+After=local-fs.target
+# A flapping connector can trigger this many times in a row. Without this, systemd
+# would refuse to start the unit after 5 starts in 10s, exactly when it is needed most.
+StartLimitIntervalSec=0
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/ssd-recover.sh udev
+TimeoutStartSec=300

@@ -1,0 +1,16 @@
+[Unit]
+Description=Measurement PPPoE session (nodefaultroute) for the paired path probe
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=forking
+# hinet-dyn = the 浮動制 account, which permits concurrent logins.
+# NEVER point this at hinet-fixed while the CHT modem dials 固定制 -- single session,
+# they will kick each other and the modem's dial will look like a config failure.
+ExecStart=/usr/bin/pon hinet-dyn
+ExecStop=/usr/bin/poff hinet-dyn
+RemainAfterExit=yes
+Restart=on-failure
+RestartSec=20
+[Install]
+WantedBy=multi-user.target

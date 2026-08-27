@@ -1,0 +1,4 @@
+#!/bin/sh
+[ "$6" = "measure" ] || exit 0
+ip rule del priority 200 2>/dev/null
+exit 0

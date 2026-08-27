@@ -1,0 +1,10 @@
+[Unit]
+Description=Paired ISP path latency probe (modem vs own PPPoE)
+After=network-online.target
+[Service]
+ExecStart=/root/netmeasure/probe.sh
+Restart=always
+RestartSec=10
+Nice=10
+[Install]
+WantedBy=multi-user.target

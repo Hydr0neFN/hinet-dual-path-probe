@@ -1,0 +1,8 @@
+#!/bin/sh
+# $1=iface $4=local IP $6=ipparam
+[ "$6" = "measure" ] || exit 0
+ip route replace default dev "$1" table 200
+ip rule del priority 200 2>/dev/null
+ip rule add from "$4" lookup 200 priority 200
+logger -t netmeasure "ppp up $1 src=$4 policy-route table 200"
+exit 0

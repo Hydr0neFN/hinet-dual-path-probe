@@ -1,0 +1,8 @@
+[Unit]
+Description=Outbound heartbeat to the external dead-man switch
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/heartbeat.sh
