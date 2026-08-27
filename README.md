@@ -1,6 +1,6 @@
 # Does a static IP actually make your game ping better?
 
-A live, same-instant A/B of two ISP account types on the same line, measured from one
+A live, concurrent A/B of two ISP account types on the same line, measured from one
 Raspberry Pi — including a way to measure the **actual UDP path a Source 2 game uses**,
 not just ICMP to something nearby.
 
