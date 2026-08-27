@@ -3,7 +3,7 @@ date,path,field,median_ms,p95_ms,samples
 2026-08-26,modem,cf_avg,3.0,3.0,580
 2026-08-26,pppoe,sdr_udp_rtt,34.0,40.0,580
 2026-08-26,pppoe,cf_avg,25.0,182.0,580
-2026-08-27,modem,sdr_udp_rtt,34.0,53.0,981
-2026-08-27,modem,cf_avg,3.0,3.0,981
-2026-08-27,pppoe,sdr_udp_rtt,34.0,53.0,976
-2026-08-27,pppoe,cf_avg,24.0,211.0,976
+2026-08-27,modem,sdr_udp_rtt,34.0,57.0,990
+2026-08-27,modem,cf_avg,3.0,3.0,990
+2026-08-27,pppoe,sdr_udp_rtt,34.0,57.0,985
+2026-08-27,pppoe,cf_avg,24.0,211.0,985
