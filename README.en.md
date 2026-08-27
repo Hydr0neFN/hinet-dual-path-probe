@@ -154,6 +154,39 @@ So:
 - **The Cloudflare fault only exists on the dynamic path.** Whatever the routing problem
   is, the two account pools are not handled identically, and only one of them detours.
 
+### The jitter a 45-second probe cannot see
+
+The main probe samples every 45 seconds. What a player feels in-game happens between those
+samples, so a median or a p95 cannot answer "does it bounce".
+
+The UDP method used for the game path **cannot be run fast**: the relay rate-limits its
+replies with a token bucket, and the reply count caps at 9–13 no matter how fast or how long
+you send. So this test uses ICMP instead.
+
+The trade-off, stated plainly: **ICMP is not the game's UDP 5-tuple and may take a different
+ECMP bucket.** The UDP method that does match the 5-tuple cannot run at this cadence. This
+toolkit cannot give you both properties at once.
+
+Conditions: `ping -i 0.05` (20 pps), 60 seconds, **both paths at the same instant against the
+same target** (the Tokyo SDR relay), during a calm period with no degradation in progress.
+0% loss on both.
+
+| | median | p95 | p99 | max | stdev | per-packet jitter | >60 ms |
+|---|---|---|---|---|---|---|---|
+| Static IP | 33.7 | 35.3 | 52.6 | 59.6 | 2.68 | 1.02 | 0 |
+| Dynamic IP | 33.8 | 41.6 | 57.6 | 71.9 | 4.23 | 1.45 | 4 |
+
+(all in ms; "per-packet jitter" is the mean absolute difference between consecutive RTTs)
+
+How to read it: **the medians are identical, the stability is not.** p95 differs by 6 ms, the
+standard deviation is 58% higher, and the dynamic path crosses 60 ms four times where the
+static path never does.
+
+A 10 pps run minutes earlier pointed the same way: `mdev` 2.70 vs 7.65, max 58 vs 86 ms.
+
+This is the only measurement here that directly supports "the static account is steadier",
+and the main probe's sample rate could never have shown it.
+
 ### What this does *not* show
 
 - The relay→game-server leg is invisible here. Of ~82 ms observed in-game, the probe can
