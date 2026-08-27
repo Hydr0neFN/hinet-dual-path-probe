@@ -23,10 +23,19 @@ OUT = sys.argv[2] if len(sys.argv) > 2 else "data"
 MAX_DAYS = int(os.environ.get("HISTORY_DAYS", "30"))
 MIN_SAMPLES = 12          # a day with fewer samples than this is noise, not a data point
 
-PANELS = [
-    ("sdr_udp_rtt", "p95", "遊戲路徑 p95 · SDR relay RTT", "ms"),
-    ("cf_avg", "med", "Cloudflare 1.1.1.1 中位數", "ms"),
-]
+FIELDS = [("sdr_udp_rtt", "p95"), ("cf_avg", "med")]
+TITLES = {
+    "zh": ["遊戲路徑 p95 · SDR relay RTT", "Cloudflare 1.1.1.1 中位數"],
+    "en": ["Game path p95 · SDR relay RTT", "Cloudflare 1.1.1.1 median"],
+}
+CAPTION = {
+    "zh": "每日彙整 · 最後一天仍在累積中 · 產生時間 %s",
+    "en": "Daily rollup · the last day is still accumulating · generated %s",
+}
+UNIT = "ms"
+
+# kept so the rollup/CSV code below can stay locale-free
+PANELS = [(f, st, TITLES["zh"][i], UNIT) for i, (f, st) in enumerate(FIELDS)]
 
 
 def ceiling(v):
@@ -99,7 +108,7 @@ def write_csv(daily, path_out):
     return days
 
 
-def svg(daily, days, theme_name, path_out):
+def svg(daily, days, theme_name, path_out, loc="zh"):
     th = gr.THEME[theme_name]
     # PAD_T has to clear the legend band, not just the panel title: at 34 the legend
     # (baseline 24) and the first title (baseline PAD_T-9 = 25) printed on top of
@@ -124,10 +133,11 @@ def svg(daily, days, theme_name, path_out):
     for p in gr.ORDER:
         o.append('<circle cx="%.1f" cy="20" r="5" fill="%s"/>' % (lx + 5, th["series"][p]))
         o.append('<text x="%.1f" y="24" font-size="12" fill="%s">%s</text>'
-                 % (lx + 15, th["ink2"], gr.esc(gr.LABEL[p])))
-        lx += 30 + 7.6 * len(gr.LABEL[p])
+                 % (lx + 15, th["ink2"], gr.esc(gr.LABEL_BY_LOC[loc][p])))
+        lx += 30 + 7.6 * len(gr.LABEL_BY_LOC[loc][p])
 
-    for pi, (field, stat, title, unit) in enumerate(PANELS):
+    for pi, (field, stat, _zh_title, unit) in enumerate(PANELS):
+        title = TITLES[loc][pi]
         top = PAD_T + pi * (PH + GAP)
         vals = [daily[(d, p)][field][stat]
                 for d in days for p in gr.ORDER
@@ -183,10 +193,9 @@ def svg(daily, days, theme_name, path_out):
                          'fill="%s">%s</text>'
                          % (X(i), top + PH + 18, th["ink3"], d.strftime("%m/%d")))
 
-    o.append('<text x="%d" y="%d" font-size="11" fill="%s">'
-             '每日彙整 · 最後一天仍在累積中 · 產生時間 %s</text>'
+    o.append('<text x="%d" y="%d" font-size="11" fill="%s">%s</text>'
              % (PAD_L, H - 8, th["ink3"],
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M")))
+                gr.esc(CAPTION[loc] % datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))))
     o.append("</svg>")
     open(path_out, "w", encoding="utf-8").write("\n".join(o))
 
@@ -203,8 +212,10 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     days = write_csv(daily, os.path.join(OUT, "history.csv"))
     days = days[-MAX_DAYS:]
-    for name in ("light", "dark"):
-        svg(daily, days, name, os.path.join(OUT, "history-%s.svg" % name))
+    for loc in gr.LOCALES:
+        for name in ("light", "dark"):
+            svg(daily, days, name,
+                os.path.join(OUT, "history-%s%s.svg" % (name, gr.suffix(loc))), loc)
     print("history: %d days rendered, %d day/path groups" % (len(days), len(daily)))
     return 0
 

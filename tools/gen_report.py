@@ -22,7 +22,66 @@ GAP_BREAK_MIN = 25       # never draw a line across an outage. Must exceed BUCKE
                          # or every adjacent bucket reads as a gap and the chart
                          # degenerates into isolated dots.
 
-LABEL = {"modem": "Static IP (固定制)", "pppoe": "Dynamic IP (浮動制)"}
+# Every user-visible string, keyed by locale. zh-TW keeps the technical terms in English
+# because that is how the audience writes; the English side drops the Chinese entirely.
+LABEL_BY_LOC = {
+    "zh": {"modem": "Static IP (固定制)", "pppoe": "Dynamic IP (浮動制)"},
+    "en": {"modem": "Static IP", "pppoe": "Dynamic IP"},
+}
+LABEL = LABEL_BY_LOC["zh"]          # load() only uses the keys, which are locale-independent
+LOCALES = ("zh", "en")
+
+
+def suffix(loc):
+    """zh keeps the original filenames so nothing already linking to them breaks."""
+    return "" if loc == "zh" else ".en"
+
+
+STR = {
+    "zh": {
+        "footer": "%d 分鐘中位數 · 兩條路徑由同一台主機同時量測 · 時間為 UTC+8",
+        "panels": [
+            "Cloudflare 1.1.1.1 — 往返延遲 RTT",
+            "Steam Datagram Relay 東京 — 往返延遲 RTT（CS2 實際走的路徑）",
+            "回報封包遺失的樣本比例",
+        ],
+        "unit_ms": "ms",
+        "unit_loss": "% 樣本",
+        "stats_title": "# 量測結果",
+        "dataset": "完整資料集：`%s` → `%s` · **%d 筆樣本**（每條路徑 `%d` 筆）",
+        "scope": "> 這些表格涵蓋**所有**曾經記錄的樣本；README 上的圖只顯示最近 %d 小時，"
+                 "所以隨著時間拉長，兩者會逐漸不同。",
+        "paired": "兩條路徑由同一台主機、在同一輪迴圈中**同時**量測——所以差異來自路徑，"
+                  "不是來自時間點。（`2026-08-27 21:02` 之前的樣本是先後量測、相隔約 9 秒，詳見 README。）",
+        "head1": "| 指標 | 固定制 中位數 | 固定制 p95 | 浮動制 中位數 | 浮動制 p95 |",
+        "diff_title": "## 配對差值（浮動制 減 固定制，同一輪迴圈）",
+        "head2": "| 指標 | 中位數 | p95 | 浮動制較差 >5 ms 的樣本比例 |",
+        "regen": "_由運行中的探針自動重新產生。最後更新：%s（UTC+8）_",
+    },
+    "en": {
+        "footer": "%d-minute medians · both paths measured from one host at the same instant "
+                  "· times are UTC+8",
+        "panels": [
+            "Cloudflare 1.1.1.1 — round-trip latency",
+            "Steam Datagram Relay Tokyo — round-trip latency (the path CS2 actually uses)",
+            "Share of samples reporting packet loss",
+        ],
+        "unit_ms": "ms",
+        "unit_loss": "% of samples",
+        "stats_title": "# Results",
+        "dataset": "Full dataset: `%s` → `%s` · **%d samples** (`%d` per path)",
+        "scope": "> These tables cover **every** sample ever recorded; the chart in the README "
+                 "shows only the last %d hours, so the two drift apart as time goes on.",
+        "paired": "Both paths are measured from the same host in the same loop iteration, so a "
+                  "difference comes from the path and not from when it was taken. (Samples "
+                  "before `2026-08-27 21:02` were taken one after the other, about 9 s apart -- "
+                  "see the README.)",
+        "head1": "| Metric | Static median | Static p95 | Dynamic median | Dynamic p95 |",
+        "diff_title": "## Paired difference (dynamic minus static, same loop iteration)",
+        "head2": "| Metric | Median | p95 | Share of samples where dynamic is >5 ms worse |",
+        "regen": "_Regenerated automatically by the running probe. Last updated: %s (UTC+8)._",
+    },
+}
 ORDER = ["modem", "pppoe"]
 
 THEME = {
@@ -104,7 +163,7 @@ def esc(s):
     return (str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
 
 
-def svg(series_by_panel, t0, t1, theme_name, path_out):
+def svg(series_by_panel, t0, t1, theme_name, path_out, loc="zh"):
     """series_by_panel: [(title, unit, {path: [(t, v)]}), ...]"""
     T = THEME[theme_name]
     W, PAD_L, PAD_R, PAD_T = 900, 62, 132, 58
@@ -128,7 +187,7 @@ def svg(series_by_panel, t0, t1, theme_name, path_out):
     lx = PAD_L
     for p in ORDER:
         a(f'<rect x="{lx}" y="10" width="10" height="10" rx="2" fill="{T["series"][p]}"/>')
-        a(f'<text x="{lx+16}" y="19" font-size="12" fill="{T["ink2"]}">{esc(LABEL[p])}</text>')
+        a(f'<text x="{lx+16}" y="19" font-size="12" fill="{T["ink2"]}">{esc(LABEL_BY_LOC[loc][p])}</text>')
         lx += 190
 
     for pi, panel in enumerate(series_by_panel):
@@ -183,7 +242,7 @@ def svg(series_by_panel, t0, t1, theme_name, path_out):
                   f'stroke-linejoin="round" stroke-linecap="round"/>')
             # direct label at the right end - secondary encoding, so colour is never the only cue
             t, v = pts[-1]
-            endlabels.append([Y(v), f'{LABEL[p].split(" (")[0]} {v:.0f}'])
+            endlabels.append([Y(v), f'{LABEL_BY_LOC[loc][p].split(" (")[0]} {v:.0f}'])
 
         # Nudge end labels apart when the two series land on nearly the same value,
         # otherwise the labels overprint and the secondary encoding is lost.
@@ -206,7 +265,7 @@ def svg(series_by_panel, t0, t1, theme_name, path_out):
         a(f'<text x="{X(t):.1f}" y="{y}" font-size="11" text-anchor="middle" '
           f'fill="{T["ink3"]}">{t.strftime("%m-%d %H:%M")}</text>')
     a(f'<text x="{PAD_L}" y="{y+20}" font-size="11" fill="{T["ink3"]}">'
-      f'{esc(f"{BUCKET_MIN} 分鐘中位數 · 兩條路徑由同一台主機同時量測 · 時間為 UTC+8")}</text>')
+      f'{esc(STR[loc]["footer"] % BUCKET_MIN)}</text>')
     a("</svg>")
     open(path_out, "w", encoding="utf-8").write("\n".join(o))
 
@@ -222,16 +281,19 @@ def main():
     win = [r for r in rows if r["_t"] >= cutoff]
     t0, t1 = win[0]["_t"], win[-1]["_t"]
 
-    panels = [
-        ("Cloudflare 1.1.1.1 — 往返延遲 RTT", "ms",
-         {p: bucket(win, "cf_avg", p) for p in ORDER}),
-        ("Steam Datagram Relay 東京 — 往返延遲 RTT（CS2 實際走的路徑）", "ms",
-         {p: bucket(win, "sdr_udp_rtt", p) for p in ORDER}),
-        ("回報封包遺失的樣本比例", "% 樣本",
-         {p: loss_rate(win, p) for p in ORDER}, 100),
-    ]
-    for name in ("light", "dark"):
-        svg(panels, t0, t1, name, os.path.join(OUT, f"chart-{name}.svg"))
+    cf = {p: bucket(win, "cf_avg", p) for p in ORDER}
+    sdr = {p: bucket(win, "sdr_udp_rtt", p) for p in ORDER}
+    loss = {p: loss_rate(win, p) for p in ORDER}
+    for loc in LOCALES:
+        t = STR[loc]
+        panels = [
+            (t["panels"][0], t["unit_ms"], cf),
+            (t["panels"][1], t["unit_ms"], sdr),
+            (t["panels"][2], t["unit_loss"], loss, 100),
+        ]
+        for name in ("light", "dark"):
+            svg(panels, t0, t1, name,
+                os.path.join(OUT, f"chart-{name}{suffix(loc)}.svg"), loc)
 
     # scrubbed raw data - the src column is a public IP address
     with open(os.path.join(OUT, "paired-scrubbed.csv"), "w", newline="") as f:
@@ -252,49 +314,47 @@ def main():
         v.sort()
         return st.median(v), v[min(len(v) - 1, int(len(v) * 0.95))]
 
-    lines = ["# 量測結果", "",
-             f"完整資料集：`{rows[0]['ts']}` → `{rows[-1]['ts']}` · **{len(rows)} 筆樣本**"
-             f"（每條路徑 `{sum(1 for r in rows if r['path']=='modem')}` 筆）", "",
-             f"> 這些表格涵蓋**所有**曾經記錄的樣本；README 上的圖只顯示最近 {WINDOW_H} 小時，"
-             f"所以隨著時間拉長，兩者會逐漸不同。", "",
-             "兩條路徑由同一台主機、在同一輪迴圈中**同時**量測 —— 所以差異來自路徑，不是來自時間點。"
-             "（`2026-08-27 21:02` 之前的樣本是先後量測、相隔約 9 秒，詳見 README。）", "",
-             "| 指標 | 固定制 中位數 | 固定制 p95 | 浮動制 中位數 | 浮動制 p95 |",
-             "|---|---|---|---|---|"]
-    for field, name in (("sdr_udp_rtt", "Tokyo SDR relay, UDP RTT (ms)"),
-                        ("tokyo_avg", "Tokyo SDR relay, ICMP RTT (ms)"),
-                        ("cf_avg", "Cloudflare 1.1.1.1 RTT (ms)"),
-                        ("goog_avg", "Google 8.8.8.8 RTT (ms)")):  # 技術名詞保留英文
-        a1, a2 = agg(field, "modem", rows), agg(field, "pppoe", rows)
-        if a1 and a2:
-            lines.append(f"| {name} | {a1[0]:.0f} | {a1[1]:.0f} | {a2[0]:.0f} | {a2[1]:.0f} |")
+    for loc in LOCALES:
+      t = STR[loc]
+      lines = [t["stats_title"], "",
+               t["dataset"] % (rows[0]["ts"], rows[-1]["ts"], len(rows),
+                               sum(1 for r in rows if r["path"] == "modem")), "",
+               t["scope"] % WINDOW_H, "",
+               t["paired"], "",
+               t["head1"],
+               "|---|---|---|---|---|"]
+      for field, name in (("sdr_udp_rtt", "Tokyo SDR relay, UDP RTT (ms)"),
+                          ("tokyo_avg", "Tokyo SDR relay, ICMP RTT (ms)"),
+                          ("cf_avg", "Cloudflare 1.1.1.1 RTT (ms)"),
+                          ("goog_avg", "Google 8.8.8.8 RTT (ms)")):  # 技術名詞保留英文
+          a1, a2 = agg(field, "modem", rows), agg(field, "pppoe", rows)
+          if a1 and a2:
+              lines.append(f"| {name} | {a1[0]:.0f} | {a1[1]:.0f} | {a2[0]:.0f} | {a2[1]:.0f} |")
 
-    lines += ["", "## 配對差值（浮動制 減 固定制，同一輪迴圈）", "",
-              "| 指標 | 中位數 | p95 | 浮動制較差 >5 ms 的樣本比例 |",
-              "|---|---|---|---|"]
-    by_ts = {}
-    for r in rows:
-        by_ts.setdefault(r["ts"], {})[r["path"]] = r
-    pairs = [v for v in by_ts.values() if len(v) == 2]
-    for field, name in (("sdr_udp_rtt", "Tokyo SDR relay, UDP RTT"),
-                        ("tokyo_avg", "Tokyo SDR relay, ICMP RTT"),
-                        ("cf_avg", "Cloudflare 1.1.1.1 RTT"),
-                        ("goog_avg", "Google 8.8.8.8 RTT")):
-        d = []
-        for p in pairs:
-            x, y = num(p["modem"].get(field)), num(p["pppoe"].get(field))
-            if x is not None and y is not None:
-                d.append(y - x)
-        if d:
-            d.sort()
-            p95 = d[min(len(d) - 1, int(len(d) * 0.95))]
-            worse = sum(1 for v in d if v > 5) / len(d) * 100
-            lines.append(f"| {name} | {st.median(d):+.0f} ms | {p95:+.0f} ms | {worse:.1f}% |")
+      lines += ["", t["diff_title"], "", t["head2"], "|---|---|---|---|"]
+      by_ts = {}
+      for r in rows:
+          by_ts.setdefault(r["ts"], {})[r["path"]] = r
+      pairs = [v for v in by_ts.values() if len(v) == 2]
+      for field, name in (("sdr_udp_rtt", "Tokyo SDR relay, UDP RTT"),
+                          ("tokyo_avg", "Tokyo SDR relay, ICMP RTT"),
+                          ("cf_avg", "Cloudflare 1.1.1.1 RTT"),
+                          ("goog_avg", "Google 8.8.8.8 RTT")):
+          d = []
+          for p in pairs:
+              x, y = num(p["modem"].get(field)), num(p["pppoe"].get(field))
+              if x is not None and y is not None:
+                  d.append(y - x)
+          if d:
+              d.sort()
+              p95 = d[min(len(d) - 1, int(len(d) * 0.95))]
+              worse = sum(1 for v in d if v > 5) / len(d) * 100
+              lines.append(f"| {name} | {st.median(d):+.0f} ms | {p95:+.0f} ms | {worse:.1f}% |")
 
-    lines += ["", f"_由運行中的探針自動重新產生。最後更新："
-                  f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}（UTC+8）_"]
-    open(os.path.join(OUT, "stats.md"), "w", encoding="utf-8").write("\n".join(lines) + "\n")
-    print(f"wrote {OUT}/chart-light.svg, chart-dark.svg, stats.md, paired-scrubbed.csv "
+      lines += ["", t["regen"] % datetime.datetime.now().strftime("%Y-%m-%d %H:%M")]
+      open(os.path.join(OUT, f"stats{suffix(loc)}.md"), "w",
+           encoding="utf-8").write("\n".join(lines) + "\n")
+    print(f"wrote {OUT}/chart-*.svg (zh+en), stats.md, stats.en.md, paired-scrubbed.csv "
           f"({len(rows)} rows, window {WINDOW_H}h)")
     return 0
 

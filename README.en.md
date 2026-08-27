@@ -11,11 +11,11 @@ Cloudflare, dramatically yes.** The data below is regenerated hourly from a prob
 is still running.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="data/chart-dark.svg">
-  <img alt="Latency and packet loss over time on two ISP paths measured simultaneously" src="data/chart-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="data/chart-dark.en.svg">
+  <img alt="Latency and packet loss over time on two ISP paths measured simultaneously" src="data/chart-light.en.svg">
 </picture>
 
-Full numbers, always current: **[data/stats.md](data/stats.md)** · raw samples:
+Full numbers, always current: **[data/stats.en.md](data/stats.en.md)** · raw samples:
 [data/paired-scrubbed.csv](data/paired-scrubbed.csv)
 
 ### Day to day
@@ -25,8 +25,8 @@ before it. This one is a **daily rollup** -- one point per day, growing for as l
 probe keeps running:
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="data/history-dark.svg">
-  <img alt="Daily rollup of game-path p95 and Cloudflare median for both ISP paths" src="data/history-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="data/history-dark.en.svg">
+  <img alt="Daily rollup of game-path p95 and Cloudflare median for both ISP paths" src="data/history-light.en.svg">
 </picture>
 
 Per-day numbers: **[data/history.csv](data/history.csv)** -- one row per day, so the commit
@@ -121,7 +121,7 @@ https://api.steampowered.com/ISteamApps/GetSDRConfig/v1/?appid=730
 
 ## What the data says
 
-See [data/stats.md](data/stats.md) for live figures. The shape of the result:
+See [data/stats.en.md](data/stats.en.md) for live figures. The shape of the result:
 
 | | Static IP | Dynamic IP |
 |---|---|---|
