@@ -35,6 +35,11 @@ git reset --hard --quiet origin/main
 
 python3 "$REPO/tools/gen_report.py" "$CSV" "$REPO/data" || exit 1
 
+# The main chart is a rolling 48-hour window, so a quiet day changes nothing visible and
+# this script commits nothing at all. The daily rollup gains a row every day and keeps
+# moving the current day's row, so the history is always readable in the diff.
+python3 "$REPO/tools/gen_history.py" "$CSV" "$REPO/data" || exit 1
+
 git add -A data/
 if git diff --cached --quiet; then
   echo "$(date -Is) nothing changed"

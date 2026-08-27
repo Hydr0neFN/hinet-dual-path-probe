@@ -18,6 +18,20 @@ is still running.
 Full numbers, always current: **[data/stats.md](data/stats.md)** · raw samples:
 [data/paired-scrubbed.csv](data/paired-scrubbed.csv)
 
+### Day to day
+
+The chart above is a rolling 48-hour window, so a quiet day looks identical to the one
+before it. This one is a **daily rollup** -- one point per day, growing for as long as the
+probe keeps running:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="data/history-dark.svg">
+  <img alt="Daily rollup of game-path p95 and Cloudflare median for both ISP paths" src="data/history-light.svg">
+</picture>
+
+Per-day numbers: **[data/history.csv](data/history.csv)** -- one row per day, so the commit
+diff is readable on its own. The last day is still accumulating and its values move.
+
 ---
 
 ## Why this exists

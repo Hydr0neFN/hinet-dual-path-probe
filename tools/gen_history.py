@@ -1,0 +1,192 @@
+#!/usr/bin/env python3
+"""Daily rollup of the paired probe, so the repo shows an evolving history and not just a
+rolling 48-hour window.
+
+The main chart always renders "the last two days", which means a quiet day produces no
+visible change at all and the hourly publish commits nothing. This writes one row per
+calendar day per path instead: the file gains a row every day and the current day's row
+keeps moving, so there is always something to look at in the diff.
+
+Palette, labels and series order are imported from gen_report so the two charts can never
+drift apart. Stdlib only -- this runs on the Pi.
+"""
+import csv
+import datetime
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import gen_report as gr
+
+SRC = sys.argv[1] if len(sys.argv) > 1 else "/root/netmeasure/paired.csv"
+OUT = sys.argv[2] if len(sys.argv) > 2 else "data"
+MAX_DAYS = int(os.environ.get("HISTORY_DAYS", "30"))
+MIN_SAMPLES = 12          # a day with fewer samples than this is noise, not a data point
+
+PANELS = [
+    ("sdr_udp_rtt", "p95", "遊戲路徑 p95 · SDR relay RTT", "ms"),
+    ("cf_avg", "med", "Cloudflare 1.1.1.1 中位數", "ms"),
+]
+
+
+def pct(values, q):
+    """Nearest-rank percentile. q=0.5 gives the median."""
+    if not values:
+        return None
+    s = sorted(values)
+    k = max(0, min(len(s) - 1, int(round(q * (len(s) - 1)))))
+    return s[k]
+
+
+def rollup(rows):
+    """{(day, path): {field: {'med': x, 'p95': y, 'n': k}}}"""
+    acc = {}
+    for r in rows:
+        key = (r["_t"].date(), r["path"])
+        for field, _, _, _ in PANELS:
+            v = gr.num(r.get(field))
+            if v is None:
+                continue
+            acc.setdefault(key, {}).setdefault(field, []).append(v)
+    out = {}
+    for key, fields in acc.items():
+        day = {}
+        for field, vals in fields.items():
+            if len(vals) < MIN_SAMPLES:
+                continue
+            day[field] = {"med": pct(vals, 0.5), "p95": pct(vals, 0.95), "n": len(vals)}
+        if day:
+            out[key] = day
+    return out
+
+
+def write_csv(daily, path_out):
+    days = sorted({d for d, _ in daily})
+    with open(path_out, "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["date", "path", "field", "median_ms", "p95_ms", "samples"])
+        for d in days:
+            for p in gr.ORDER:
+                day = daily.get((d, p))
+                if not day:
+                    continue
+                for field, _, _, _ in PANELS:
+                    st = day.get(field)
+                    if not st:
+                        continue
+                    w.writerow([d.isoformat(), p, field,
+                                "%.1f" % st["med"], "%.1f" % st["p95"], st["n"]])
+    return days
+
+
+def svg(daily, days, theme_name, path_out):
+    th = gr.THEME[theme_name]
+    W, PH, PAD_L, PAD_R, PAD_T, GAP = 880, 150, 58, 96, 34, 30
+    H = PAD_T + len(PANELS) * (PH + GAP) + 26
+    o = ['<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d" '
+         'font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">'
+         % (W, H, W, H),
+         '<rect width="%d" height="%d" fill="%s"/>' % (W, H, th["surface"])]
+
+    # Days are evenly spaced rather than time-proportional: with a handful of days a
+    # proportional axis crushes them into the left edge and reads as a single blob.
+    n = len(days)
+    plot_w = W - PAD_L - PAD_R
+
+    def X(i):
+        return PAD_L + (plot_w / 2 if n == 1 else plot_w * i / (n - 1))
+
+    # legend, always present for two series; the end labels repeat identity in text
+    lx = PAD_L
+    for p in gr.ORDER:
+        o.append('<circle cx="%.1f" cy="18" r="5" fill="%s"/>' % (lx + 5, th["series"][p]))
+        o.append('<text x="%.1f" y="22" font-size="12" fill="%s">%s</text>'
+                 % (lx + 15, th["ink2"], gr.esc(gr.LABEL[p])))
+        lx += 30 + 7.6 * len(gr.LABEL[p])
+
+    for pi, (field, stat, title, unit) in enumerate(PANELS):
+        top = PAD_T + pi * (PH + GAP)
+        vals = [daily[(d, p)][field][stat]
+                for d in days for p in gr.ORDER
+                if (d, p) in daily and field in daily[(d, p)]]
+        hi = gr.nice_ceiling(max(vals) * 1.15) if vals else 1
+
+        def Y(v, _top=top, _hi=hi):
+            return _top + PH - (PH * min(v, _hi) / _hi)
+
+        o.append('<text x="%d" y="%.1f" font-size="13" font-weight="600" fill="%s">%s</text>'
+                 % (PAD_L, top - 9, th["ink"], gr.esc(title)))
+        for k in range(3):
+            v = hi * k / 2.0
+            y = Y(v)
+            o.append('<line x1="%d" y1="%.1f" x2="%.1f" y2="%.1f" stroke="%s" stroke-width="1"/>'
+                     % (PAD_L, y, W - PAD_R, y, th["grid"]))
+            o.append('<text x="%d" y="%.1f" font-size="11" text-anchor="end" fill="%s">%s</text>'
+                     % (PAD_L - 8, y + 4, th["ink3"], "%g" % v))
+        o.append('<text x="%d" y="%.1f" font-size="11" text-anchor="end" fill="%s">%s</text>'
+                 % (PAD_L - 8, top - 12, th["ink3"], unit))
+
+        ends = []
+        for p in gr.ORDER:
+            pts = [(i, daily[(d, p)][field][stat]) for i, d in enumerate(days)
+                   if (d, p) in daily and field in daily[(d, p)]]
+            if not pts:
+                continue
+            col = th["series"][p]
+            if len(pts) > 1:
+                o.append('<polyline fill="none" stroke="%s" stroke-width="2" '
+                         'stroke-linejoin="round" points="%s"/>'
+                         % (col, " ".join("%.1f,%.1f" % (X(i), Y(v)) for i, v in pts)))
+            # markers always drawn: with two or three days a bare line is unreadable
+            for i, v in pts:
+                o.append('<circle cx="%.1f" cy="%.1f" r="4.5" fill="%s" stroke="%s" '
+                         'stroke-width="2"/>' % (X(i), Y(v), col, th["surface"]))
+            ends.append([Y(pts[-1][1]), col, "%.0f %s" % (pts[-1][1], unit)])
+
+        # direct end labels, nudged apart so two close series do not overprint
+        ends.sort()
+        if len(ends) == 2 and ends[1][0] - ends[0][0] < 13:
+            ends[0][0] -= (13 - (ends[1][0] - ends[0][0])) / 2.0
+            ends[1][0] = ends[0][0] + 13
+        for y, col, txt in ends:
+            o.append('<text x="%.1f" y="%.1f" font-size="12" font-weight="600" fill="%s">%s</text>'
+                     % (W - PAD_R + 8, y + 4, col, txt))
+
+        # x labels on the last panel only -- one shared axis, never one per panel
+        if pi == len(PANELS) - 1:
+            step = max(1, (n + 7) // 8)
+            for i, d in enumerate(days):
+                if i % step and i != n - 1:
+                    continue
+                o.append('<text x="%.1f" y="%.1f" font-size="11" text-anchor="middle" '
+                         'fill="%s">%s</text>'
+                         % (X(i), top + PH + 18, th["ink3"], d.strftime("%m/%d")))
+
+    o.append('<text x="%d" y="%d" font-size="11" fill="%s">'
+             '每日彙整 · 最後一天仍在累積中 · 產生時間 %s</text>'
+             % (PAD_L, H - 8, th["ink3"],
+                datetime.datetime.now().strftime("%Y-%m-%d %H:%M")))
+    o.append("</svg>")
+    open(path_out, "w", encoding="utf-8").write("\n".join(o))
+
+
+def main():
+    rows = gr.load(SRC)
+    if not rows:
+        print("no rows in %s" % SRC)
+        return 1
+    daily = rollup(rows)
+    if not daily:
+        print("no day reached MIN_SAMPLES=%d yet" % MIN_SAMPLES)
+        return 1
+    os.makedirs(OUT, exist_ok=True)
+    days = write_csv(daily, os.path.join(OUT, "history.csv"))
+    days = days[-MAX_DAYS:]
+    for name in ("light", "dark"):
+        svg(daily, days, name, os.path.join(OUT, "history-%s.svg" % name))
+    print("history: %d days rendered, %d day/path groups" % (len(days), len(daily)))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

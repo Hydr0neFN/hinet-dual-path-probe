@@ -15,6 +15,19 @@
 完整數字（隨時更新）：**[data/stats.md](data/stats.md)** · 原始樣本：
 [data/paired-scrubbed.csv](data/paired-scrubbed.csv)
 
+### 每天的變化
+
+上面那張圖只畫最近 48 小時，所以安靜的一天看起來跟前一天一模一樣。下面這張是**每日彙整**，
+一天一個點，探針跑多久就長多長：
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="data/history-dark.svg">
+  <img alt="兩條 ISP 路徑逐日彙整的遊戲路徑 p95 與 Cloudflare 中位數" src="data/history-light.svg">
+</picture>
+
+逐日數字：**[data/history.csv](data/history.csv)**（一天一列，可以直接看 commit diff）。
+最後一天還在累積中，數值會隨當天樣本變動。
+
 ---
 
 ## 為什麼做這件事
