@@ -23,10 +23,12 @@ OUT = sys.argv[2] if len(sys.argv) > 2 else "data"
 MAX_DAYS = int(os.environ.get("HISTORY_DAYS", "30"))
 MIN_SAMPLES = 12          # a day with fewer samples than this is noise, not a data point
 
-FIELDS = [("sdr_udp_rtt", "p95"), ("cf_avg", "med")]
+FIELDS = [("sdr_udp_rtt", "p95"), ("cf_avg", "med"), ("jit_mdev", "med")]
 TITLES = {
-    "zh": ["遊戲路徑 p95 · SDR relay RTT", "Cloudflare 1.1.1.1 中位數"],
-    "en": ["Game path p95 · SDR relay RTT", "Cloudflare 1.1.1.1 median"],
+    "zh": ["遊戲路徑 p95 · SDR relay RTT", "Cloudflare 1.1.1.1 中位數",
+           "遊戲路徑抖動 · 每輪 20 pps 突發的 mdev 中位數"],
+    "en": ["Game path p95 · SDR relay RTT", "Cloudflare 1.1.1.1 median",
+           "Game-path jitter · median mdev of a 20 pps burst per cycle"],
 }
 CAPTION = {
     "zh": "每日彙整 · 最後一天仍在累積中 · 產生時間 %s",
@@ -114,7 +116,9 @@ def svg(daily, days, theme_name, path_out, loc="zh"):
     # (baseline 24) and the first title (baseline PAD_T-9 = 25) printed on top of
     # each other, both starting at PAD_L.
     W, PH, PAD_L, PAD_R, PAD_T, GAP = 880, 150, 58, 96, 60, 34
-    H = PAD_T + len(PANELS) * (PH + GAP) + 26
+    nlive = sum(1 for f, _s, _t, _u in PANELS
+                if any(f in daily.get((d, p), {}) for d in days for p in gr.ORDER))
+    H = PAD_T + max(1, nlive) * (PH + GAP) + 26
     o = ['<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d" '
          'font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">'
          % (W, H, W, H),
@@ -136,9 +140,13 @@ def svg(daily, days, theme_name, path_out, loc="zh"):
                  % (lx + 15, th["ink2"], gr.esc(gr.LABEL_BY_LOC[loc][p])))
         lx += 30 + 7.6 * len(gr.LABEL_BY_LOC[loc][p])
 
+    live = [i for i, (f, st_, _t, _u) in enumerate(PANELS)
+            if any(f in daily.get((d, p), {}) for d in days for p in gr.ORDER)]
     for pi, (field, stat, _zh_title, unit) in enumerate(PANELS):
+        if pi not in live:
+            continue
         title = TITLES[loc][pi]
-        top = PAD_T + pi * (PH + GAP)
+        top = PAD_T + live.index(pi) * (PH + GAP)
         vals = [daily[(d, p)][field][stat]
                 for d in days for p in gr.ORDER
                 if (d, p) in daily and field in daily[(d, p)]]
@@ -184,7 +192,7 @@ def svg(daily, days, theme_name, path_out, loc="zh"):
                      % (W - PAD_R + 8, y + 4, col, txt))
 
         # x labels on the last panel only -- one shared axis, never one per panel
-        if pi == len(PANELS) - 1:
+        if pi == live[-1]:
             step = max(1, (n + 7) // 8)
             for i, d in enumerate(days):
                 if i % step and i != n - 1:

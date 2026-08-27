@@ -10,7 +10,22 @@ CF=1.1.1.1
 GOOG=8.8.8.8
 LAST_MTR=0
 
-[ -f "$CSV" ] || echo "ts,path,src,tokyo_avg,tokyo_loss,cf_avg,cf_loss,goog_avg,goog_loss,sdr_udp_rtt" > "$CSV"
+[ -f "$CSV" ] || echo "ts,path,src,tokyo_avg,tokyo_loss,cf_avg,cf_loss,goog_avg,goog_loss,sdr_udp_rtt,jit_mdev,jit_max" > "$CSV"
+
+jitter() { # $1=src ip  $2=target -> "mdev,max"  (a 2.5 s burst at 20 pps)
+  # The 45 s cadence of this loop cannot see what a player feels between samples. A short
+  # burst can. ICMP, not the SDR UDP method: the relay rate-limits its replies with a token
+  # bucket -- ~10 of burst allowance, refilling at roughly 0.05-0.1/s -- so replies cap at
+  # 9-13 no matter how fast you send. The cost is that ICMP need not share the game's ECMP
+  # bucket; there is no way to have both properties with this toolkit.
+  local out mdev mx
+  out=$(ping -I "$1" -n -q -c 50 -i 0.05 -W 1 "$2" 2>/dev/null)
+  mdev=$(echo "$out" | awk -F'/' '/^rtt|^round-trip/ {printf "%.2f", $7}')
+  mx=$(echo "$out"   | awk -F'/' '/^rtt|^round-trip/ {printf "%.1f", $6}')
+  [ -z "$mdev" ] && mdev=-1
+  [ -z "$mx" ]   && mx=-1
+  echo "$mdev,$mx"
+}
 
 probe() { # $1=src ip  $2=target -> "avg,loss"
   local out avg loss
@@ -36,16 +51,17 @@ while true; do
     NAME=${pair%%:*}; SRC=${pair#*:}
     (
       if [ -z "$SRC" ]; then
-        echo "$TS,$NAME,DOWN,-1,100,-1,100,-1,100,-1" > "$TMP/$NAME"
+        echo "$TS,$NAME,DOWN,-1,100,-1,100,-1,100,-1,-1,-1" > "$TMP/$NAME"
         exit 0
       fi
       T=$(probe "$SRC" "$TOKYO"); C=$(probe "$SRC" "$CF"); G=$(probe "$SRC" "$GOOG")
       # End-to-end UDP RTT to the relay's game port -- the transport CS2 actually uses.
-      # RTT only: the relay answers junk datagrams non-deterministically (16-33% no-reply
-      # at every inter-packet gap tested), so its loss figure is meaningless. ICMP owns loss.
+      # RTT only: the relay RATE-LIMITS its replies (token bucket, ~10 of burst allowance),
+      # so its no-reply share says nothing about the network. ICMP owns loss and jitter.
       SDR=$(timeout 20 python3 /root/netmeasure/sdrping.py "$SRC" "$TOKYO" 27023 8 2>/dev/null | cut -d, -f1)
       [ -z "$SDR" ] && SDR=-1
-      echo "$TS,$NAME,$SRC,$T,$C,$G,$SDR" > "$TMP/$NAME"
+      J=$(jitter "$SRC" "$TOKYO")
+      echo "$TS,$NAME,$SRC,$T,$C,$G,$SDR,$J" > "$TMP/$NAME"
     ) &
   done
   wait
