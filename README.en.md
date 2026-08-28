@@ -156,36 +156,48 @@ So:
 
 ### The jitter a 45-second probe cannot see
 
-The main probe samples every 45 seconds. What a player feels in-game happens between those
-samples, so a median or a p95 cannot answer "does it bounce".
+The main probe samples every 45 seconds. What a player feels happens between two samples, so
+a median or a p95 cannot answer "does it bounce".
 
-The UDP method used for the game path **cannot be run fast**: the relay rate-limits its
-replies with a token bucket, and the reply count caps at 9–13 no matter how fast or how long
-you send. So this test uses ICMP instead.
+So every cycle now also fires a short high-rate burst: 50 ICMP echoes per path at 20 pps,
+2.5 seconds, recorded as two extra columns — `jit_mdev` (the mdev of that burst, i.e. the
+jitter) and `jit_max` (the worst RTT inside it).
 
-The trade-off, stated plainly: **ICMP is not the game's UDP 5-tuple and may take a different
-ECMP bucket.** The UDP method that does match the 5-tuple cannot run at this cadence. This
-toolkit cannot give you both properties at once.
+Why ICMP and not the UDP method used for the game path: the relay rate-limits its replies
+with a token bucket, and the reply count caps at 9–13 no matter how fast you send. **The
+price is that ICMP is not the game's UDP 5-tuple and may take a different ECMP bucket** —
+this toolkit cannot have both properties, so that is said up front rather than buried.
 
-Conditions: `ping -i 0.05` (20 pps), 60 seconds, **both paths at the same instant against the
-same target** (the Tokyo SDR relay), during a calm period with no degradation in progress.
-0% loss on both.
+As of the morning of 2026-08-28 this is **868 paired bursts** (about 9.5 hours), and still
+growing.
 
-| | median | p95 | p99 | max | stdev | per-packet jitter | >60 ms |
-|---|---|---|---|---|---|---|---|
-| Static IP | 33.7 | 35.3 | 52.6 | 59.6 | 2.68 | 1.02 | 0 |
-| Dynamic IP | 33.8 | 41.6 | 57.6 | 71.9 | 4.23 | 1.45 | 4 |
+The jitter itself, `jit_mdev` (ms):
 
-(all in ms; "per-packet jitter" is the mean absolute difference between consecutive RTTs)
+| | median | p75 | p95 | p99 | max |
+|---|---|---|---|---|---|
+| Static IP | 0.43 | 0.48 | 0.56 | 0.80 | 2.37 |
+| Dynamic IP | 0.77 | 1.07 | 11.12 | 13.05 | 15.99 |
 
-How to read it: **the medians are identical, the stability is not.** p95 differs by 6 ms, the
-standard deviation is 58% higher, and the dynamic path crosses 60 ms four times where the
-static path never does.
+The medians differ by 1.8×; **the p95 differs by 20×**. The static distribution is very
+nearly a flat line — its p99 is still 0.80 — while the dynamic one has a long, fat tail.
 
-A 10 pps run minutes earlier pointed the same way: `mdev` 2.70 vs 7.65, max 58 vs 86 ms.
+The worst packet in each burst, `jit_max` (ms):
 
-This is the only measurement here that directly supports "the static account is steadier",
-and the main probe's sample rate could never have shown it.
+| | median | p95 | p99 | max | bursts over 60 ms |
+|---|---|---|---|---|---|
+| Static IP | 34.5 | 35.5 | 38.2 | 64.0 | 1 / 868 |
+| Dynamic IP | 37.4 | 79.5 | 94.8 | 113.4 | 146 / 868 |
+
+**One dynamic burst in six contains a spike past 60 ms. The static account did it once in
+868.**
+
+Paired, at the same instant against the same target: the dynamic path is the jitterier of
+the two in **93.4% of cycles (811 / 868)**, with a paired difference of **+0.32 ms** at the
+median and **+10.63 ms** at the p95. The point is not the average — it is that nine times in
+ten the dynamic path is worse, and when it is worse it is much worse.
+
+The median ping has not moved. The stability has. The daily rollup now carries a third panel
+for this, and the per-day numbers are in [`data/history.csv`](data/history.csv).
 
 ### What this does *not* show
 
