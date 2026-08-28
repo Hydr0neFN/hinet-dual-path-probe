@@ -121,9 +121,13 @@ export default {
       const outstanding = await env.HB.get(key);
 
       if (url.pathname === "/alert/clear") {
+        // Delete unconditionally. KV reads are eventually consistent, so a clear handled
+        // by a colo that has not yet seen the failing record would read null, skip the
+        // delete, and leave the alert outstanding forever -- which is exactly what
+        // happened on 2026-08-29. The read decides only whether to send recovery mail.
+        await env.HB.delete(key);
         if (outstanding) {
           const since = JSON.parse(outstanding).ts;
-          await env.HB.delete(key);
           await sendMail(
             env,
             `${source}: recovered`,
