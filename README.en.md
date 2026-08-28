@@ -263,6 +263,45 @@ What it does settle is narrow but real: **for this comparison, the BRAS is not t
 variable.** What it does not settle is the wider objection — another subscriber may land on
 a different BRAS entirely, and nothing here speaks to that.
 
+### 2026-08-29 update: the fault moved
+
+The dynamic path's Cloudflare penalty is gone. Its median dropped from 24 ms to 8 ms,
+which is now exactly what the static path measures.
+
+That is not the good news it looks like. Over the same 51 paired samples (00:00–00:34) the
+static path went the other way — 3 ms to 8 ms — and the jitter on both rose together, from
+0.43 ms and 0.69 ms to 3.86 ms each. Latency to the Tokyo relay rose about 5 ms on both.
+The gap closed because both paths fell to the same level, not because one of them
+recovered.
+
+Walking the path hop by hop puts the source in one place. The LAN gateway measures an mdev
+of 0.062 ms, so nothing local is responsible. The jitter starts at 168.95.94.134, the first
+hop past the BRAS, and it is the same on both sessions across two rounds:
+
+| Target | Static, round 1 / 2 | Dynamic, round 1 / 2 |
+|---|---|---|
+| 168.95.94.134 (first hop past the BRAS) | 3.64 / 4.05 ms | 3.90 / 3.73 ms |
+| Tokyo relay | 3.82 / 3.81 ms | 4.36 / 4.18 ms |
+
+That hop is shared — the two sessions do not diverge until two hops past the BRAS. So the
+fault did not end, it moved. It used to sit *after* the split, which is why only the
+dynamic account paid for it. It now sits *before* the split, where neither account can
+avoid it.
+
+One thing this cannot tell you is whether the original problem is periodic. Measurement
+started on 2026-08-26, so the window is 3.5 days, and the problem was reported as coming
+and going over roughly a week before that. Less than one period is not enough to say a
+period has ended.
+
+**Two PCs, one LAN, 80 ms and 20 ms.** On the same day, two machines wired to the same LAN,
+on the same account, in the same game on the same server, at the same moment, sat at 80 ms
+and 20 ms. That is a reported observation, not something this probe measured, and it
+belongs here as a caveat rather than a result. Every shared hop above is identical for both
+machines, so nothing in the shared path accounts for a 4× difference; what is left is
+per-client relay selection or path assignment. Which is worth sitting with: **the spread
+between two machines on one line can be wider than the spread between the two account
+types.** Anyone promising that a static IP will fix your ping is skipping past that.
+
 ### What this does *not* show
 
 - The relay→game-server leg is invisible here. Of ~82 ms observed in-game, the probe can
