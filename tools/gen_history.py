@@ -180,7 +180,15 @@ def svg(daily, days, theme_name, path_out, loc="zh"):
             for i, v in pts:
                 o.append('<circle cx="%.1f" cy="%.1f" r="4.5" fill="%s" stroke="%s" '
                          'stroke-width="2"/>' % (X(i), Y(v), col, th["surface"]))
-            ends.append([Y(pts[-1][1]), col, "%.0f %s" % (pts[-1][1], unit)])
+            # Jitter lives below 1 ms, where "%.0f" prints "0 ms" and "1 ms" and the
+            # panel loses its point entirely. Scale the precision to the magnitude.
+            val = pts[-1][1]
+            if abs(val) >= 10:
+                txt = "%.0f" % val
+            else:
+                # trailing zeros are noise: 3.00 should read "3", 0.80 should read "0.8"
+                txt = ("%.2f" % val).rstrip("0").rstrip(".")
+            ends.append([Y(val), col, "%s %s" % (txt, unit)])
 
         # direct end labels, nudged apart so two close series do not overprint
         ends.sort()
