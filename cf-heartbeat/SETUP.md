@@ -70,3 +70,28 @@ curl "https://pi-heartbeat.<你的子網域>.workers.dev/status?token=<BEAT_TOKE
 ## 關於門檻與重開機
 
 watchdog 造成的重開遠少於 15 分鐘，所以單次自我修復的重開**不會**寄信給你。這是刻意的：你要收到的是「需要你採取行動」的故障，不是「機器自己修好了」的通知。
+
+## 具名工作的告警（`/alert`）
+
+心跳是 dead-man switch：只有一個槽位，`heartbeat.sh` 每 5 分鐘覆寫一次，它只回答一個問題——「這台機器還在嗎」。像每日推送、每週備份這種**自己有排程的具名工作**不適合塞進那個槽位，硬塞會同時弄壞三件事：訊息 5 分鐘內就被覆寫、健康的機器被標成 degraded，以及——因為 `/beat/fail` 是邊緣觸發——某個工作把狀態卡在 degraded 之後，**後續真正的硬體故障不會造成訊號變化，也就不會寄信**。
+
+所以具名工作走另一條路，各自有自己的 KV key，永遠不碰心跳槽位：
+
+```
+POST /alert?token=<BEAT_TOKEN>&source=<名稱>        # 這個工作壞了
+POST /alert/clear?token=<BEAT_TOKEN>&source=<名稱>  # 這個工作恢復了
+```
+
+每個 `source` 各自邊緣觸發：第一次失敗寄信，之後重複失敗靜音，恢復時寄一封。`/status` 會列出目前所有未解除的具名告警。`source` 必須符合 `^[a-z0-9][a-z0-9._-]{0,63}$`——KV key 是字串串接出來的，所以名稱是受限的，不是被信任的。
+
+機器上用 `scripts/job-alert.sh` 包好，不必自己拼 URL：
+
+```
+job-alert.sh <source> fail      "訊息"   # 確定性失敗 → 立刻寄信
+job-alert.sh <source> soft-fail "訊息"   # 暫時性失敗 → 連續第 2 次才寄信
+job-alert.sh <source> ok                 # healthy → 解除告警
+```
+
+`soft-fail` 對應一條長期原則：**被自動修好的失敗不是事件**。每小時執行的 timer 掉一次 fetch 是雜訊，連掉兩次才是故障。端點同樣讀 `/etc/heartbeat.url`，享有一樣的多端點備援。
+
+成功路徑一定要呼叫 `ok`，**「這次沒東西要做」也算成功**——否則某天的失敗會一直掛著，直到資料剛好又變動為止。

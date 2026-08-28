@@ -83,3 +83,41 @@ over to the machine; an untested dead-man switch is not a dead-man switch.
 A watchdog reboot takes well under 15 minutes, so a single self-healing reboot will not
 email you. That is deliberate: you want to hear about outages you have to act on, not
 about the machine fixing itself.
+
+## Alerts for named jobs (`/alert`)
+
+The heartbeat is a dead-man switch: one slot, overwritten by `heartbeat.sh` every five
+minutes, answering exactly one question — is the box still there. Named jobs that run on
+their own schedule — a daily push, a weekly backup — do not fit that slot, and forcing them
+into it breaks three things at once: the message is overwritten within five minutes, a
+healthy box reads as degraded, and — because `/beat/fail` is edge-triggered — once a job has
+parked the state at degraded, **a later genuine hardware fault produces no change in the
+signal and therefore no mail**.
+
+So named jobs take a separate path, with their own KV key each, never touching the
+heartbeat slot:
+
+```
+POST /alert?token=<BEAT_TOKEN>&source=<name>        # this job is failing
+POST /alert/clear?token=<BEAT_TOKEN>&source=<name>  # this job is healthy again
+```
+
+Each `source` is edge-triggered on its own: the first failure mails, repeats stay silent,
+recovery mails once. `/status` lists every outstanding named alert. A `source` must match
+`^[a-z0-9][a-z0-9._-]{0,63}$` — KV keys are built by concatenation, so the name is
+constrained rather than trusted.
+
+On the machine, `scripts/job-alert.sh` wraps this so nothing has to assemble URLs:
+
+```
+job-alert.sh <source> fail      "message"   # deterministic failure -> mail at once
+job-alert.sh <source> soft-fail "message"   # transient -> mail on the 2nd in a row
+job-alert.sh <source> ok                    # healthy -> clears the alert
+```
+
+`soft-fail` exists for a standing rule: **a failure that was automatically repaired is a
+non-event.** One lost fetch on an hourly timer is noise; two in a row is an outage. The
+endpoints come from `/etc/heartbeat.url`, so this inherits the same multi-endpoint failover.
+
+The success path must call `ok`, and **"nothing to do this run" counts as success** —
+otherwise one bad day stays outstanding until the data happens to change again.

@@ -9,14 +9,31 @@
 //   POST/GET  /beat        ?token=<TOKEN>   -> record a healthy heartbeat
 //   POST/GET  /beat/fail   ?token=<TOKEN>   -> record a heartbeat that reports degradation
 //   GET       /status      ?token=<TOKEN>   -> human-readable current state
+//   POST/GET  /alert       ?token=&source=  -> a named job reports it is failing
+//   POST/GET  /alert/clear ?token=&source=  -> that job reports it is healthy again
 //
 // The request body (if any) is stored verbatim and included in the alert email, so the
 // mail says what was wrong at the last contact, not just that contact stopped.
+//
+// Why /alert exists separately from /beat/fail
+// -------------------------------------------
+// The heartbeat is a DEAD-MAN SWITCH: one slot, overwritten every 5 minutes, whose only
+// question is "is the box still there". Named jobs that fail on their own schedule -- a
+// daily push, a weekly backup -- do not fit that slot, and forcing them into it breaks it
+// three ways: their message is overwritten within 5 minutes, a healthy box gets reported
+// as degraded, and because /beat/fail is edge-triggered, one job holding the state at
+// "degraded" means a LATER genuine hardware fault produces no change in the signal and
+// therefore no mail. That saturation happened for real on 2026-08-28 (smartmontools). So
+// /alert keeps its own KV keys, dedupes per source, and never touches the heartbeat slot.
 
 import { EmailMessage } from "cloudflare:email";
 
 const KEY_LAST = "last";     // JSON: { ts, state, body }
 const KEY_ALERT = "alerted"; // "1" while an outage alert is outstanding
+const KEY_ALERT_PREFIX = "alert:"; // + <source>, JSON { ts, body } while that job is failing
+
+// KV keys are built by concatenation, so the source name is constrained, not trusted.
+const SOURCE_RE = /^[a-z0-9][a-z0-9._-]{0,63}$/;
 
 function buildMime({ from, to, subject, text }) {
   const domain = from.split("@")[1];
@@ -65,13 +82,75 @@ export default {
       const last = JSON.parse(raw);
       const age = (Date.now() - last.ts) / 1000;
       const alerting = (await env.HB.get(KEY_ALERT)) === "1";
+      const listed = await env.HB.list({ prefix: KEY_ALERT_PREFIX });
+      let jobs = "(none)";
+      if (listed.keys.length) {
+        const lines = [];
+        for (const k of listed.keys) {
+          const rec = JSON.parse((await env.HB.get(k.name)) || "{}");
+          const name = k.name.slice(KEY_ALERT_PREFIX.length);
+          const since = rec.ts ? fmtAge((Date.now() - rec.ts) / 1000) : "?";
+          lines.push(`${name} (failing ${since}): ${rec.body || "(none)"}`);
+        }
+        jobs = lines.join("\n            ");
+      }
       return new Response(
         `last seen : ${new Date(last.ts).toISOString()} (${fmtAge(age)} ago)\n` +
           `state     : ${last.state}\n` +
           `alerting  : ${alerting}\n` +
-          `report    : ${last.body || "(none)"}\n`,
+          `report    : ${last.body || "(none)"}\n` +
+          `job alerts: ${jobs}\n`,
         { status: 200 },
       );
+    }
+
+    // Named-job alerts. Own key space (alert:<source>), never KEY_LAST, so a failing
+    // job can neither mask the dead-man switch nor be masked by it.
+    if (url.pathname === "/alert" || url.pathname === "/alert/clear") {
+      const source = url.searchParams.get("source") || "";
+      if (!SOURCE_RE.test(source)) {
+        return new Response("bad or missing ?source=\n", { status: 400 });
+      }
+      const key = KEY_ALERT_PREFIX + source;
+      let body = "";
+      try {
+        body = (await request.text()).slice(0, 2000);
+      } catch {
+        body = "";
+      }
+      const outstanding = await env.HB.get(key);
+
+      if (url.pathname === "/alert/clear") {
+        if (outstanding) {
+          const since = JSON.parse(outstanding).ts;
+          await env.HB.delete(key);
+          await sendMail(
+            env,
+            `${source}: recovered`,
+            `${source} is reporting success again.\n\n` +
+              `Was failing for: ${fmtAge((Date.now() - since) / 1000)}\n\n${body}\n`,
+          );
+        }
+        return new Response("cleared\n", { status: 200 });
+      }
+
+      // Edge-triggered per source: the first failure mails, repeats only refresh the
+      // stored body. A job that fails every day must not mail every day.
+      if (!outstanding) {
+        await env.HB.put(key, JSON.stringify({ ts: Date.now(), body }));
+        await sendMail(
+          env,
+          `${source}: FAILING`,
+          `${source} on the RPi4 reported a failure.\n\n${body}\n\n` +
+            `Further failures from this source stay silent until it reports success again.\n`,
+        );
+      } else {
+        await env.HB.put(
+          key,
+          JSON.stringify({ ts: JSON.parse(outstanding).ts, body }),
+        );
+      }
+      return new Response("ok\n", { status: 200 });
     }
 
     if (url.pathname === "/beat" || url.pathname === "/beat/fail") {
