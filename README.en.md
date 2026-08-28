@@ -43,9 +43,16 @@ diff is readable on its own. The last day is still accumulating and its values m
 ## Why this exists
 
 CS2 was spiking to 200 ms on an otherwise idle connection. The obvious suspects —
-server picker, DNS, Wi-Fi — were all wrong. Traceroute eventually showed ICMP
-`type 11 time-exceeded` from a routing loop between the ISP (HiNet, AS3462) and
-Cloudflare (AS13335), with traffic detouring internationally instead of peering locally.
+server picker, DNS, Wi-Fi — were all wrong. Traceroute pointed at one leg, between the
+ISP (HiNet, AS3462) and Cloudflare (AS13335), where the hops looked wrong in a way the
+rest of the path did not. The theory at the time was that traffic was detouring
+internationally instead of peering locally.
+
+That theory did not survive being measured. Both accounts reach Cloudflare's Taipei
+colo, and the dynamic one is at 3 ms a quarter of the time — see
+[Same BRAS, different route](#same-bras-different-route) below. The fault was real; the
+first explanation reached for was not. Which is the whole argument for measuring instead
+of reasoning from a traceroute.
 
 The ISP offers a free switch from a dynamic-IP account to a static-IP one. The obvious
 question — *does that actually change the route?* — turns out to be surprisingly hard to

@@ -33,7 +33,9 @@
 
 ## 為什麼做這件事
 
-明明線路完全沒其他人用，打 CS2 ping 卻會無預警飆到 200 ms。把常見的可能原因（server picker、DNS、Wi-Fi）全排查過一輪，發現都不是。最後用 traceroute 抓到 ICMP `type 11 time-exceeded`，才抓出是 HiNet（AS3462）跟 Cloudflare（AS13335）之間的 routing loop：流量根本沒在台灣本地互連，反而繞去國外轉了一圈。
+明明線路沒其他人用，打 CS2 的 ping 卻會無預警飆到 200 ms。排查過 server picker、DNS 與 Wi-Fi 發現都不是問題；用 traceroute 抓到異常出在 HiNet（AS3462）與 Cloudflare（AS13335）之間，當時推測是流量沒走本地互連、被繞去國外。
+
+但這個推測並未撐過後續量測。故障是真的，當初給的解釋卻是錯的——這正是為什麼要老實把數據量出來。完整的實測分析請看後面的〈同一台 BRAS，不同的路由〉小節。
 
 剛好 HiNet 的非固定制可以線上申請配發一組固定 IP，撥號帳號後綴改成 `@ip.hinet.net` 就生效，本身不用另外加錢（這跟企業用的固定制專線是兩回事）。問題就來了：**改用固定 IP 之後，路由真的會變好嗎？**
 
