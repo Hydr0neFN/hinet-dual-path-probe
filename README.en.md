@@ -157,8 +157,10 @@ So:
 - **It does remove jitter.** The static path's p95 equals its median hour after hour; the
   dynamic path's does not. For a twitch shooter that is worth more than a few ms of
   average.
-- **The Cloudflare fault only exists on the dynamic path.** Whatever the routing problem
-  is, the two account pools are not handled identically, and only one of them detours.
+- **The Cloudflare fault only exists on the dynamic path.** The two account pools are not
+  handled identically — but it is not a detour. Both reach Cloudflare Taipei, and the
+  dynamic path is at 3 ms a quarter of the time; the route quality to that one destination
+  is simply unstable on one pool and not the other.
 
 ### The jitter a 45-second probe cannot see
 
@@ -205,15 +207,66 @@ ten the dynamic path is worse, and when it is worse it is much worse.
 The median ping has not moved. The stability has. The daily rollup now carries a third panel
 for this, and the per-day numbers are in [`data/history.csv`](data/history.csv).
 
+### Same BRAS, different route
+
+A recurring objection to a comparison like this is: *you just happened to land on a good
+BRAS, and someone else would get the opposite result.* That is worth taking seriously, and
+this setup can answer part of it — because both sessions turn out to terminate on the same
+one.
+
+The line carries two simultaneous PPPoE sessions: the static account on the ISP's own
+modem, the dynamic account dialled by the Raspberry Pi. Same copper, same CPE, same
+instant. Across 105 static and 97 dynamic hop traces, the first IP hop off each session is
+identical, and so is the hop after it:
+
+| | Static | Dynamic |
+|---|---|---|
+| LAN gateway | 192.168.1.1 | — (the Pi dials PPPoE itself) |
+| First hop off PPPoE | 168.95.98.254 (105/105) | 168.95.98.254 (97/97) |
+| Next hop, toward Tokyo | 168.95.95.118 | 168.95.95.118 |
+| Next hop, toward 1.1.1.1 | 168.95.94.134 | 168.95.94.134 |
+| **Two past the BRAS, Tokyo** | 220.128.8.234 (103) | 220.128.9.210 (63) / 220.128.8.210 (29) |
+| **Two past the BRAS, 1.1.1.1** | 220.128.8.142 (101) | 220.128.8.178 (60) / 220.128.8.150 (29) |
+
+Identical until two hops past the BRAS, then they split, and stay split.
+
+Cloudflare's own `/cdn-cgi/trace` endpoint, queried three times per session, reports
+`colo=TPE loc=TW` on both. Both sessions reach Cloudflare Taipei. Neither leaves the
+country.
+
+Which makes the spread the interesting part (~3,500 samples per path):
+
+| | p25 | median | p95 | p99 | max |
+|---|---|---|---|---|---|
+| Static IP | 3 ms | 3 ms | 3 ms | 4 ms | 38 ms |
+| Dynamic IP | **3 ms** | 24 ms | 202 ms | 212 ms | 229 ms |
+
+The dynamic path's p25 is 3 ms. A quarter of the time it is exactly as fast as the static
+one, to the same colo, over the same BRAS. It is not a longer road. Per day, the share of
+sub-5 ms samples runs 24.5% / 7.1% / 46.6% — every day has both states, so this is not a
+one-off route change that stuck. By hour it is 0% from midnight through 10:00, around 60%
+at midday, and after 21:00 the median sits above 200 ms.
+
+Same BRAS, same destination colo, and a floor the dynamic path demonstrably reaches — what
+is left is the upstream routing or QoS state applied to that IP range, flipping between a
+good mode and a bad one. That is an inference, not a measurement: this probe sits on the
+customer side and can see the effect, never the policy.
+
+What it does settle is narrow but real: **for this comparison, the BRAS is not the
+variable.** What it does not settle is the wider objection — another subscriber may land on
+a different BRAS entirely, and nothing here speaks to that.
+
 ### What this does *not* show
 
 - The relay→game-server leg is invisible here. Of ~82 ms observed in-game, the probe can
   only see ~33 ms of it. A clean probe during a bad game would point at that leg.
 - One line, one ISP, one city. This is a method you can re-run, not a general claim about
   static IPs.
-- Two nights of peak-hour data at the time of writing, one of which was lost to an
-  unrelated hardware failure (see below). The Cloudflare result is unambiguous; treat the
-  jitter result as directional.
+- Three days and 7,053 paired samples so far; one night was lost to an unrelated hardware
+  failure (see below). The Cloudflare result is unambiguous; the jitter result now has the
+  samples to stand on, and keeps growing.
+- Both sessions share a BRAS, which removes it as a variable here — but says nothing about
+  subscribers who land on a different one.
 
 
 ## Why Valorant is unaffected by this
@@ -229,10 +282,11 @@ different ways.
 | Does gameplay traffic touch Cloudflare | possibly — that is the fault this project found | **No.** Cloudflare only appears at the web/auth layer |
 | Server location | depends on the relay (this project measures Tokyo) | Hong Kong / Tokyo / Singapore, reached over Riot's own backbone |
 
-The crux: **HiNet and Cloudflare have no good local interconnect**, so that traffic
-detours internationally — while **Riot lands in Taipei at TPIX**, so packets leave HiNet
-straight into Riot Direct and stay on Riot's own network to Hong Kong or Tokyo. One path
-can hit the routing loop; the other never goes near it.
+The crux: **HiNet's route to Cloudflare Taipei flips between a good and a bad state on the
+dynamic IP range** (see above), so that leg is only as good as whichever state it happens
+to be in — while **Riot lands in Taipei at TPIX**, so packets leave HiNet straight into
+Riot Direct and stay on Riot's own network to Hong Kong or Tokyo. One path is exposed to
+that instability; the other never touches it.
 
 > **Scope, stated plainly**: this probe does **not** measure Valorant. The above explains
 > why the fault mechanism structurally cannot reach it — it is not a measurement result.
