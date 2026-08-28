@@ -2,13 +2,19 @@
 
 **English** · [繁體中文](README.md)
 
+## TL;DR — the rest of this was written by Claude. In one line: get the static plan, it makes a real difference. (Your line may differ.)
+
 A live, concurrent A/B of two ISP account types on the same line, measured from one
 Raspberry Pi — including a way to measure the **actual UDP path a Source 2 game (CS2, in this case) uses**,
 not just ICMP to something nearby.
 
-Short answer for the impatient: **for the game path, no. For everything behind
-Cloudflare, dramatically yes.** The data below is regenerated hourly from a probe that
-is still running.
+Your median game ping will not drop — on the path the game actually takes, the two accounts
+are identical. What changes is how steady it is: one dynamic burst in six contains a spike
+past 60 ms, against one in 868 on the static account. And everything behind Cloudflare is a
+different story entirely — 3 ms versus 24 ms at the median, with the dynamic path past
+200 ms and losing packets at peak hours.
+
+The data below is regenerated hourly from a probe that is still running.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="data/chart-dark.en.svg">
