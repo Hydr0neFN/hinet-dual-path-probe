@@ -11,20 +11,20 @@
 <text x="50" y="139.0" font-size="11" text-anchor="end" fill="#8a8880">40</text>
 <line x1="58" y1="60.0" x2="784.0" y2="60.0" stroke="#2e2e2c" stroke-width="1"/>
 <text x="50" y="64.0" font-size="11" text-anchor="end" fill="#8a8880">80</text>
-<polyline fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round" points="58.0,146.2 239.5,103.1 421.0,144.4 602.5,144.4 784.0,123.8"/>
+<polyline fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round" points="58.0,146.2 239.5,103.1 421.0,144.4 602.5,144.4 784.0,125.6"/>
 <circle cx="58.0" cy="146.2" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="239.5" cy="103.1" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="421.0" cy="144.4" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="602.5" cy="144.4" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
-<circle cx="784.0" cy="123.8" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="784.0" cy="125.6" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <polyline fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round" points="58.0,135.0 239.5,101.2 421.0,142.5 602.5,140.6 784.0,123.8"/>
 <circle cx="58.0" cy="135.0" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="239.5" cy="101.2" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="421.0" cy="142.5" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="602.5" cy="140.6" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="784.0" cy="123.8" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
-<text x="792.0" y="121.2" font-size="12" font-weight="600" fill="#3987e5">46 ms</text>
-<text x="792.0" y="134.2" font-size="12" font-weight="600" fill="#d95926">46 ms</text>
+<text x="792.0" y="122.2" font-size="12" font-weight="600" fill="#d95926">46 ms</text>
+<text x="792.0" y="135.2" font-size="12" font-weight="600" fill="#3987e5">45 ms</text>
 <text x="58" y="233.0" font-size="13" font-weight="600" fill="#ffffff">Cloudflare 1.1.1.1 median（ms）</text>
 <line x1="58" y1="394.0" x2="784.0" y2="394.0" stroke="#2e2e2c" stroke-width="1"/>
 <text x="50" y="398.0" font-size="11" text-anchor="end" fill="#8a8880">0</text>
@@ -57,16 +57,16 @@
 <circle cx="421.0" cy="513.5" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="602.5" cy="513.5" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="784.0" cy="512.0" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
-<polyline fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round" points="421.0,473.0 602.5,479.0 784.0,452.0"/>
+<polyline fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round" points="421.0,473.0 602.5,479.0 784.0,453.5"/>
 <circle cx="421.0" cy="473.0" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="602.5" cy="479.0" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
-<circle cx="784.0" cy="452.0" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
-<text x="792.0" y="456.0" font-size="12" font-weight="600" fill="#d95926">0.84 ms</text>
+<circle cx="784.0" cy="453.5" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
+<text x="792.0" y="457.5" font-size="12" font-weight="600" fill="#d95926">0.83 ms</text>
 <text x="792.0" y="516.0" font-size="12" font-weight="600" fill="#3987e5">0.44 ms</text>
 <text x="58.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/26</text>
 <text x="239.5" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/27</text>
 <text x="421.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/28</text>
 <text x="602.5" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/29</text>
 <text x="784.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/30</text>
-<text x="58" y="630" font-size="11" fill="#8a8880">Daily rollup · the last day is still accumulating · generated 2026-08-30 05:26</text>
+<text x="58" y="630" font-size="11" fill="#8a8880">Daily rollup · the last day is still accumulating · generated 2026-08-30 06:26</text>
 </svg>
