@@ -52,14 +52,14 @@
 <polyline fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round" points="542.0,497.4 784.0,497.4"/>
 <circle cx="542.0" cy="497.4" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="784.0" cy="497.4" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
-<polyline fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round" points="542.0,446.8 784.0,459.9"/>
+<polyline fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round" points="542.0,446.8 784.0,458.0"/>
 <circle cx="542.0" cy="446.8" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
-<circle cx="784.0" cy="459.9" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
-<text x="792.0" y="463.9" font-size="12" font-weight="600" fill="#d95926">0.63 ms</text>
+<circle cx="784.0" cy="458.0" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
+<text x="792.0" y="462.0" font-size="12" font-weight="600" fill="#d95926">0.64 ms</text>
 <text x="792.0" y="501.4" font-size="12" font-weight="600" fill="#3987e5">0.43 ms</text>
 <text x="58.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/26</text>
 <text x="300.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/27</text>
 <text x="542.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/28</text>
 <text x="784.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/29</text>
-<text x="58" y="630" font-size="11" fill="#8a8880">每日彙整 · 最後一天仍在累積中 · 產生時間 2026-08-29 19:05</text>
+<text x="58" y="630" font-size="11" fill="#8a8880">每日彙整 · 最後一天仍在累積中 · 產生時間 2026-08-29 20:05</text>
 </svg>
