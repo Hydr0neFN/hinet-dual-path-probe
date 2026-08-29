@@ -11,18 +11,18 @@
 <text x="50" y="139.0" font-size="11" text-anchor="end" fill="#8a8880">40</text>
 <line x1="58" y1="60.0" x2="784.0" y2="60.0" stroke="#2e2e2c" stroke-width="1"/>
 <text x="50" y="64.0" font-size="11" text-anchor="end" fill="#8a8880">80</text>
-<polyline fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round" points="58.0,146.2 300.0,103.1 542.0,144.4 784.0,133.1"/>
+<polyline fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round" points="58.0,146.2 300.0,103.1 542.0,144.4 784.0,135.0"/>
 <circle cx="58.0" cy="146.2" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="300.0" cy="103.1" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="542.0" cy="144.4" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
-<circle cx="784.0" cy="133.1" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="784.0" cy="135.0" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <polyline fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round" points="58.0,135.0 300.0,101.2 542.0,142.5 784.0,135.0"/>
 <circle cx="58.0" cy="135.0" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="300.0" cy="101.2" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="542.0" cy="142.5" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="784.0" cy="135.0" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
-<text x="792.0" y="131.6" font-size="12" font-weight="600" fill="#3987e5">41 ms</text>
-<text x="792.0" y="144.6" font-size="12" font-weight="600" fill="#d95926">40 ms</text>
+<text x="792.0" y="132.5" font-size="12" font-weight="600" fill="#3987e5">40 ms</text>
+<text x="792.0" y="145.5" font-size="12" font-weight="600" fill="#d95926">40 ms</text>
 <text x="58" y="233.0" font-size="13" font-weight="600" fill="#ffffff">Cloudflare 1.1.1.1 median（ms）</text>
 <line x1="58" y1="394.0" x2="784.0" y2="394.0" stroke="#2e2e2c" stroke-width="1"/>
 <text x="50" y="398.0" font-size="11" text-anchor="end" fill="#8a8880">0</text>
@@ -52,14 +52,14 @@
 <polyline fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round" points="542.0,497.4 784.0,495.5"/>
 <circle cx="542.0" cy="497.4" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="784.0" cy="495.5" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
-<polyline fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round" points="542.0,446.8 784.0,458.0"/>
+<polyline fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round" points="542.0,446.8 784.0,463.6"/>
 <circle cx="542.0" cy="446.8" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
-<circle cx="784.0" cy="458.0" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
-<text x="792.0" y="462.0" font-size="12" font-weight="600" fill="#d95926">0.64 ms</text>
+<circle cx="784.0" cy="463.6" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
+<text x="792.0" y="467.6" font-size="12" font-weight="600" fill="#d95926">0.61 ms</text>
 <text x="792.0" y="499.5" font-size="12" font-weight="600" fill="#3987e5">0.44 ms</text>
 <text x="58.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/26</text>
 <text x="300.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/27</text>
 <text x="542.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/28</text>
 <text x="784.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/29</text>
-<text x="58" y="630" font-size="11" fill="#8a8880">Daily rollup · the last day is still accumulating · generated 2026-08-29 07:03</text>
+<text x="58" y="630" font-size="11" fill="#8a8880">Daily rollup · the last day is still accumulating · generated 2026-08-29 08:03</text>
 </svg>
