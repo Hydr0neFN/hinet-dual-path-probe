@@ -57,23 +57,23 @@
 <text x="50" y="507.0" font-size="11" text-anchor="end" fill="#8a8880">0.4</text>
 <line x1="58" y1="428.0" x2="784.0" y2="428.0" stroke="#e6e5e0" stroke-width="1"/>
 <text x="50" y="432.0" font-size="11" text-anchor="end" fill="#8a8880">0.8</text>
-<polyline fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" points="348.4,497.4 493.6,497.4 638.8,499.2 784.0,501.1"/>
+<polyline fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" points="348.4,497.4 493.6,497.4 638.8,499.2 784.0,499.2"/>
 <circle cx="348.4" cy="497.4" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="493.6" cy="497.4" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="638.8" cy="499.2" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="784.0" cy="501.1" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="784.0" cy="499.2" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <polyline fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" points="348.4,446.8 493.6,454.2 638.8,443.0 784.0,448.6"/>
 <circle cx="348.4" cy="446.8" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="493.6" cy="454.2" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="638.8" cy="443.0" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="784.0" cy="448.6" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <text x="792.0" y="452.6" font-size="12" font-weight="600" fill="#eb6834">0.69 ms</text>
-<text x="792.0" y="505.1" font-size="12" font-weight="600" fill="#2a78d6">0.41 ms</text>
+<text x="792.0" y="503.2" font-size="12" font-weight="600" fill="#2a78d6">0.42 ms</text>
 <text x="58.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/26</text>
 <text x="203.2" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/27</text>
 <text x="348.4" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/28</text>
 <text x="493.6" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/29</text>
 <text x="638.8" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/30</text>
 <text x="784.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/31</text>
-<text x="58" y="630" font-size="11" fill="#8a8880">Daily rollup · the last day is still accumulating · generated 2026-08-31 03:09</text>
+<text x="58" y="630" font-size="11" fill="#8a8880">Daily rollup · the last day is still accumulating · generated 2026-08-31 04:09</text>
 </svg>
