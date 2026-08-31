@@ -1,6 +1,6 @@
 # Results
 
-Full dataset: `2026-08-26 11:55:50` → `2026-08-31 17:09:48` · **19108 samples** (`9555` per path)
+Full dataset: `2026-08-26 11:55:50` → `2026-08-31 18:09:54` · **19278 samples** (`9640` per path)
 
 > These tables cover **every** sample ever recorded; the chart in the README shows only the last 48 hours, so the two drift apart as time goes on.
 
@@ -11,15 +11,15 @@ Both paths are measured from the same host in the same loop iteration, so a diff
 | Tokyo SDR relay, UDP RTT (ms) | 34 | 35 | 33 | 38 |
 | Tokyo SDR relay, ICMP RTT (ms) | 34 | 34 | 34 | 44 |
 | Cloudflare 1.1.1.1 RTT (ms) | 3 | 3 | 24 | 70 |
-| Google 8.8.8.8 RTT (ms) | 2 | 3 | 2 | 15 |
+| Google 8.8.8.8 RTT (ms) | 2 | 3 | 2 | 14 |
 
 ## Paired difference (dynamic minus static, same loop iteration)
 
 | Metric | Median | p95 | Share of samples where dynamic is >5 ms worse |
 |---|---|---|---|
-| Tokyo SDR relay, UDP RTT | +0 ms | +3 ms | 1.7% |
-| Tokyo SDR relay, ICMP RTT | +0 ms | +8 ms | 6.5% |
-| Cloudflare 1.1.1.1 RTT | +21 ms | +67 ms | 55.8% |
+| Tokyo SDR relay, UDP RTT | +0 ms | +3 ms | 1.6% |
+| Tokyo SDR relay, ICMP RTT | +0 ms | +8 ms | 6.6% |
+| Cloudflare 1.1.1.1 RTT | +21 ms | +66 ms | 56.2% |
 | Google 8.8.8.8 RTT | +0 ms | +12 ms | 7.3% |
 
-_Regenerated automatically by the running probe. Last updated: 2026-08-31 17:10 (UTC+8)._
+_Regenerated automatically by the running probe. Last updated: 2026-08-31 18:10 (UTC+8)._
