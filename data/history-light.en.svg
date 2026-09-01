@@ -67,13 +67,13 @@
 <circle cx="542.0" cy="499.2" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="663.0" cy="499.2" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="784.0" cy="497.4" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<polyline fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" points="300.0,446.8 421.0,454.2 542.0,443.0 663.0,441.1 784.0,446.8"/>
+<polyline fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" points="300.0,446.8 421.0,454.2 542.0,443.0 663.0,441.1 784.0,448.6"/>
 <circle cx="300.0" cy="446.8" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="421.0" cy="454.2" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="542.0" cy="443.0" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="663.0" cy="441.1" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="784.0" cy="446.8" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
-<text x="792.0" y="450.8" font-size="12" font-weight="600" fill="#eb6834">0.7 ms</text>
+<circle cx="784.0" cy="448.6" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<text x="792.0" y="452.6" font-size="12" font-weight="600" fill="#eb6834">0.69 ms</text>
 <text x="792.0" y="501.4" font-size="12" font-weight="600" fill="#2a78d6">0.43 ms</text>
 <text x="58.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/26</text>
 <text x="179.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/27</text>
@@ -82,5 +82,5 @@
 <text x="542.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/30</text>
 <text x="663.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/31</text>
 <text x="784.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">09/01</text>
-<text x="58" y="630" font-size="11" fill="#8a8880">Daily rollup · the last day is still accumulating · generated 2026-09-01 15:11</text>
+<text x="58" y="630" font-size="11" fill="#8a8880">Daily rollup · the last day is still accumulating · generated 2026-09-01 16:11</text>
 </svg>
