@@ -37,9 +37,9 @@ date,path,field,median_ms,p95_ms,samples
 2026-09-01,pppoe,sdr_udp_rtt,33.0,34.0,2097
 2026-09-01,pppoe,cf_avg,25.0,56.0,2098
 2026-09-01,pppoe,jit_mdev,0.7,10.4,2098
-2026-09-02,modem,sdr_udp_rtt,33.0,34.0,556
-2026-09-02,modem,cf_avg,3.0,3.0,557
-2026-09-02,modem,jit_mdev,0.4,0.6,557
-2026-09-02,pppoe,sdr_udp_rtt,33.0,34.0,556
-2026-09-02,pppoe,cf_avg,25.0,33.0,557
-2026-09-02,pppoe,jit_mdev,0.7,9.8,557
+2026-09-02,modem,sdr_udp_rtt,33.0,34.0,649
+2026-09-02,modem,cf_avg,3.0,3.0,650
+2026-09-02,modem,jit_mdev,0.4,0.6,650
+2026-09-02,pppoe,sdr_udp_rtt,33.0,34.0,649
+2026-09-02,pppoe,cf_avg,25.0,33.0,650
+2026-09-02,pppoe,jit_mdev,0.7,10.0,650
