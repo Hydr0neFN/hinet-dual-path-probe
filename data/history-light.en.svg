@@ -77,7 +77,7 @@
 <text x="50" y="507.0" font-size="11" text-anchor="end" fill="#8a8880">0.4</text>
 <line x1="58" y1="428.0" x2="784.0" y2="428.0" stroke="#e6e5e0" stroke-width="1"/>
 <text x="50" y="432.0" font-size="11" text-anchor="end" fill="#8a8880">0.8</text>
-<polyline fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" points="203.2,497.4 275.8,497.4 348.4,499.2 421.0,499.2 493.6,499.2 566.2,499.2 638.8,499.2 711.4,499.2 784.0,503.0"/>
+<polyline fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" points="203.2,497.4 275.8,497.4 348.4,499.2 421.0,499.2 493.6,499.2 566.2,499.2 638.8,499.2 711.4,499.2 784.0,504.9"/>
 <circle cx="203.2" cy="497.4" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="275.8" cy="497.4" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="348.4" cy="499.2" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
@@ -86,8 +86,8 @@
 <circle cx="566.2" cy="499.2" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="638.8" cy="499.2" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="711.4" cy="499.2" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="784.0" cy="503.0" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<polyline fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" points="203.2,446.8 275.8,454.2 348.4,443.0 421.0,441.1 493.6,450.5 566.2,450.5 638.8,437.4 711.4,448.6 784.0,461.8"/>
+<circle cx="784.0" cy="504.9" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<polyline fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" points="203.2,446.8 275.8,454.2 348.4,443.0 421.0,441.1 493.6,450.5 566.2,450.5 638.8,437.4 711.4,448.6 784.0,465.5"/>
 <circle cx="203.2" cy="446.8" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="275.8" cy="454.2" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="348.4" cy="443.0" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
@@ -96,14 +96,14 @@
 <circle cx="566.2" cy="450.5" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="638.8" cy="437.4" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="711.4" cy="448.6" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="784.0" cy="461.8" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
-<text x="792.0" y="465.8" font-size="12" font-weight="600" fill="#eb6834">0.62 ms</text>
-<text x="792.0" y="507.0" font-size="12" font-weight="600" fill="#2a78d6">0.4 ms</text>
+<circle cx="784.0" cy="465.5" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<text x="792.0" y="469.5" font-size="12" font-weight="600" fill="#eb6834">0.6 ms</text>
+<text x="792.0" y="508.9" font-size="12" font-weight="600" fill="#2a78d6">0.39 ms</text>
 <text x="58.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/26</text>
 <text x="203.2" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/28</text>
 <text x="348.4" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/30</text>
 <text x="493.6" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">09/01</text>
 <text x="638.8" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">09/03</text>
 <text x="784.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">09/05</text>
-<text x="58" y="630" font-size="11" fill="#8a8880">Daily rollup · the last day is still accumulating · generated 2026-09-05 01:14</text>
+<text x="58" y="630" font-size="11" fill="#8a8880">Daily rollup · the last day is still accumulating · generated 2026-09-05 02:14</text>
 </svg>
