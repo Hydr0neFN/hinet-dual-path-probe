@@ -11,7 +11,7 @@
 <text x="50" y="139.0" font-size="11" text-anchor="end" fill="#8a8880">40</text>
 <line x1="58" y1="60.0" x2="784.0" y2="60.0" stroke="#2e2e2c" stroke-width="1"/>
 <text x="50" y="64.0" font-size="11" text-anchor="end" fill="#8a8880">80</text>
-<polyline fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round" points="58.0,146.2 138.7,103.1 219.3,144.4 300.0,144.4 380.7,144.4 461.3,146.2 542.0,146.2 622.7,146.2 703.3,144.4 784.0,146.2"/>
+<polyline fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round" points="58.0,146.2 138.7,103.1 219.3,144.4 300.0,144.4 380.7,144.4 461.3,146.2 542.0,146.2 622.7,146.2 703.3,144.4 784.0,144.4"/>
 <circle cx="58.0" cy="146.2" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="138.7" cy="103.1" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="219.3" cy="144.4" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
@@ -21,7 +21,7 @@
 <circle cx="542.0" cy="146.2" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="622.7" cy="146.2" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="703.3" cy="144.4" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
-<circle cx="784.0" cy="146.2" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="784.0" cy="144.4" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <polyline fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round" points="58.0,135.0 138.7,101.2 219.3,142.5 300.0,140.6 380.7,140.6 461.3,146.2 542.0,146.2 622.7,144.4 703.3,142.5 784.0,146.2"/>
 <circle cx="58.0" cy="135.0" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="138.7" cy="101.2" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
@@ -33,8 +33,8 @@
 <circle cx="622.7" cy="144.4" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="703.3" cy="142.5" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="784.0" cy="146.2" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
-<text x="792.0" y="143.8" font-size="12" font-weight="600" fill="#3987e5">34 ms</text>
-<text x="792.0" y="156.8" font-size="12" font-weight="600" fill="#d95926">34 ms</text>
+<text x="792.0" y="142.8" font-size="12" font-weight="600" fill="#3987e5">35 ms</text>
+<text x="792.0" y="155.8" font-size="12" font-weight="600" fill="#d95926">34 ms</text>
 <text x="58" y="233.0" font-size="13" font-weight="600" fill="#ffffff">Cloudflare 1.1.1.1 中位數（ms）</text>
 <line x1="58" y1="394.0" x2="784.0" y2="394.0" stroke="#2e2e2c" stroke-width="1"/>
 <text x="50" y="398.0" font-size="11" text-anchor="end" fill="#8a8880">0</text>
@@ -82,7 +82,7 @@
 <circle cx="622.7" cy="499.2" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="703.3" cy="499.2" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="784.0" cy="499.2" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
-<polyline fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round" points="219.3,446.8 300.0,454.2 380.7,443.0 461.3,441.1 542.0,450.5 622.7,450.5 703.3,437.4 784.0,450.5"/>
+<polyline fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round" points="219.3,446.8 300.0,454.2 380.7,443.0 461.3,441.1 542.0,450.5 622.7,450.5 703.3,437.4 784.0,448.6"/>
 <circle cx="219.3" cy="446.8" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="300.0" cy="454.2" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="380.7" cy="443.0" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
@@ -90,8 +90,8 @@
 <circle cx="542.0" cy="450.5" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="622.7" cy="450.5" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="703.3" cy="437.4" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
-<circle cx="784.0" cy="450.5" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
-<text x="792.0" y="454.5" font-size="12" font-weight="600" fill="#d95926">0.68 ms</text>
+<circle cx="784.0" cy="448.6" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
+<text x="792.0" y="452.6" font-size="12" font-weight="600" fill="#d95926">0.69 ms</text>
 <text x="792.0" y="503.2" font-size="12" font-weight="600" fill="#3987e5">0.42 ms</text>
 <text x="58.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/26</text>
 <text x="219.3" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/28</text>
@@ -99,5 +99,5 @@
 <text x="542.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">09/01</text>
 <text x="703.3" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">09/03</text>
 <text x="784.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">09/04</text>
-<text x="58" y="630" font-size="11" fill="#8a8880">每日彙整 · 最後一天仍在累積中 · 產生時間 2026-09-04 21:16</text>
+<text x="58" y="630" font-size="11" fill="#8a8880">每日彙整 · 最後一天仍在累積中 · 產生時間 2026-09-04 22:16</text>
 </svg>
