@@ -23,7 +23,7 @@
 <circle cx="638.8" cy="144.4" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="711.4" cy="144.4" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="784.0" cy="146.2" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<polyline fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" points="58.0,135.0 130.6,101.2 203.2,142.5 275.8,140.6 348.4,140.6 421.0,146.2 493.6,146.2 566.2,144.4 638.8,142.5 711.4,146.2 784.0,144.4"/>
+<polyline fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" points="58.0,135.0 130.6,101.2 203.2,142.5 275.8,140.6 348.4,140.6 421.0,146.2 493.6,146.2 566.2,144.4 638.8,142.5 711.4,146.2 784.0,140.6"/>
 <circle cx="58.0" cy="135.0" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="130.6" cy="101.2" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="203.2" cy="142.5" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
@@ -34,9 +34,9 @@
 <circle cx="566.2" cy="144.4" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="638.8" cy="142.5" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="711.4" cy="146.2" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="784.0" cy="144.4" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
-<text x="792.0" y="142.8" font-size="12" font-weight="600" fill="#eb6834">35 ms</text>
-<text x="792.0" y="155.8" font-size="12" font-weight="600" fill="#2a78d6">34 ms</text>
+<circle cx="784.0" cy="140.6" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<text x="792.0" y="140.9" font-size="12" font-weight="600" fill="#eb6834">37 ms</text>
+<text x="792.0" y="153.9" font-size="12" font-weight="600" fill="#2a78d6">34 ms</text>
 <text x="58" y="233.0" font-size="13" font-weight="600" fill="#0b0b0b">Cloudflare 1.1.1.1 median（ms）</text>
 <line x1="58" y1="394.0" x2="784.0" y2="394.0" stroke="#e6e5e0" stroke-width="1"/>
 <text x="50" y="398.0" font-size="11" text-anchor="end" fill="#8a8880">0</text>
@@ -87,7 +87,7 @@
 <circle cx="638.8" cy="499.2" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="711.4" cy="499.2" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="784.0" cy="504.9" r="4.5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<polyline fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" points="203.2,446.8 275.8,454.2 348.4,443.0 421.0,441.1 493.6,450.5 566.2,450.5 638.8,437.4 711.4,448.6 784.0,465.5"/>
+<polyline fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" points="203.2,446.8 275.8,454.2 348.4,443.0 421.0,441.1 493.6,450.5 566.2,450.5 638.8,437.4 711.4,448.6 784.0,458.0"/>
 <circle cx="203.2" cy="446.8" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="275.8" cy="454.2" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="348.4" cy="443.0" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
@@ -96,8 +96,8 @@
 <circle cx="566.2" cy="450.5" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="638.8" cy="437.4" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="711.4" cy="448.6" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="784.0" cy="465.5" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
-<text x="792.0" y="469.5" font-size="12" font-weight="600" fill="#eb6834">0.6 ms</text>
+<circle cx="784.0" cy="458.0" r="4.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<text x="792.0" y="462.0" font-size="12" font-weight="600" fill="#eb6834">0.64 ms</text>
 <text x="792.0" y="508.9" font-size="12" font-weight="600" fill="#2a78d6">0.39 ms</text>
 <text x="58.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/26</text>
 <text x="203.2" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/28</text>
@@ -105,5 +105,5 @@
 <text x="493.6" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">09/01</text>
 <text x="638.8" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">09/03</text>
 <text x="784.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">09/05</text>
-<text x="58" y="630" font-size="11" fill="#8a8880">Daily rollup · the last day is still accumulating · generated 2026-09-05 02:14</text>
+<text x="58" y="630" font-size="11" fill="#8a8880">Daily rollup · the last day is still accumulating · generated 2026-09-05 03:14</text>
 </svg>
