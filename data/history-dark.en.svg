@@ -85,7 +85,7 @@
 <text x="50" y="507.0" font-size="11" text-anchor="end" fill="#8a8880">0.4</text>
 <line x1="58" y1="428.0" x2="784.0" y2="428.0" stroke="#2e2e2c" stroke-width="1"/>
 <text x="50" y="432.0" font-size="11" text-anchor="end" fill="#8a8880">0.8</text>
-<polyline fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round" points="179.0,497.4 239.5,497.4 300.0,499.2 360.5,499.2 421.0,499.2 481.5,499.2 542.0,499.2 602.5,499.2 663.0,501.1 723.5,499.2 784.0,499.2"/>
+<polyline fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round" points="179.0,497.4 239.5,497.4 300.0,499.2 360.5,499.2 421.0,499.2 481.5,499.2 542.0,499.2 602.5,499.2 663.0,501.1 723.5,499.2 784.0,497.4"/>
 <circle cx="179.0" cy="497.4" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="239.5" cy="497.4" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="300.0" cy="499.2" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
@@ -96,7 +96,7 @@
 <circle cx="602.5" cy="499.2" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="663.0" cy="501.1" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="723.5" cy="499.2" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
-<circle cx="784.0" cy="499.2" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="784.0" cy="497.4" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <polyline fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round" points="179.0,446.8 239.5,454.2 300.0,443.0 360.5,441.1 421.0,450.5 481.5,450.5 542.0,437.4 602.5,448.6 663.0,448.6 723.5,452.4 784.0,456.1"/>
 <circle cx="179.0" cy="446.8" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="239.5" cy="454.2" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
@@ -110,7 +110,7 @@
 <circle cx="723.5" cy="452.4" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="784.0" cy="456.1" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <text x="792.0" y="460.1" font-size="12" font-weight="600" fill="#d95926">0.65 ms</text>
-<text x="792.0" y="503.2" font-size="12" font-weight="600" fill="#3987e5">0.42 ms</text>
+<text x="792.0" y="501.4" font-size="12" font-weight="600" fill="#3987e5">0.43 ms</text>
 <text x="58.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/26</text>
 <text x="179.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/28</text>
 <text x="300.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/30</text>
@@ -118,5 +118,5 @@
 <text x="542.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">09/03</text>
 <text x="663.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">09/05</text>
 <text x="784.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">09/07</text>
-<text x="58" y="630" font-size="11" fill="#8a8880">Daily rollup · the last day is still accumulating · generated 2026-09-07 05:09</text>
+<text x="58" y="630" font-size="11" fill="#8a8880">Daily rollup · the last day is still accumulating · generated 2026-09-07 06:09</text>
 </svg>
