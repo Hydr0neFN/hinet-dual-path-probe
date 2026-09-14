@@ -132,7 +132,7 @@
 <circle cx="707.6" cy="503.0" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="745.8" cy="501.1" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="784.0" cy="503.0" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
-<polyline fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round" points="134.4,446.8 172.6,454.2 210.8,443.0 249.1,441.1 287.3,450.5 325.5,450.5 363.7,437.4 401.9,448.6 440.1,448.6 478.3,452.4 516.5,452.4 554.7,454.2 592.9,450.5 631.2,458.0 669.4,452.4 707.6,458.0 745.8,456.1 784.0,448.6"/>
+<polyline fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round" points="134.4,446.8 172.6,454.2 210.8,443.0 249.1,441.1 287.3,450.5 325.5,450.5 363.7,437.4 401.9,448.6 440.1,448.6 478.3,452.4 516.5,452.4 554.7,454.2 592.9,450.5 631.2,458.0 669.4,452.4 707.6,458.0 745.8,456.1 784.0,450.5"/>
 <circle cx="134.4" cy="446.8" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="172.6" cy="454.2" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="210.8" cy="443.0" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
@@ -150,8 +150,8 @@
 <circle cx="669.4" cy="452.4" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="707.6" cy="458.0" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="745.8" cy="456.1" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
-<circle cx="784.0" cy="448.6" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
-<text x="792.0" y="452.6" font-size="12" font-weight="600" fill="#d95926">0.69 ms</text>
+<circle cx="784.0" cy="450.5" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
+<text x="792.0" y="454.5" font-size="12" font-weight="600" fill="#d95926">0.68 ms</text>
 <text x="792.0" y="507.0" font-size="12" font-weight="600" fill="#3987e5">0.4 ms</text>
 <text x="58.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/26</text>
 <text x="172.6" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">08/29</text>
@@ -161,5 +161,5 @@
 <text x="631.2" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">09/10</text>
 <text x="745.8" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">09/13</text>
 <text x="784.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">09/14</text>
-<text x="58" y="630" font-size="11" fill="#8a8880">每日彙整 · 最後一天仍在累積中 · 產生時間 2026-09-14 22:10</text>
+<text x="58" y="630" font-size="11" fill="#8a8880">每日彙整 · 最後一天仍在累積中 · 產生時間 2026-09-14 23:10</text>
 </svg>
