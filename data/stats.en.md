@@ -1,6 +1,6 @@
 # Results
 
-Full dataset: `2026-08-26 11:55:50` → `2026-09-15 09:10:28` · **81930 samples** (`40966` per path)
+Full dataset: `2026-08-26 11:55:50` → `2026-09-15 10:10:19` · **82116 samples** (`41059` per path)
 
 > These tables cover **every** sample ever recorded; the chart in the README shows only the last 48 hours, so the two drift apart as time goes on.
 
@@ -19,7 +19,7 @@ Both paths are measured from the same host in the same loop iteration, so a diff
 |---|---|---|---|
 | Tokyo SDR relay, UDP RTT | +0 ms | +2 ms | 0.8% |
 | Tokyo SDR relay, ICMP RTT | +0 ms | +5 ms | 4.7% |
-| Cloudflare 1.1.1.1 RTT | +0 ms | +37 ms | 44.5% |
+| Cloudflare 1.1.1.1 RTT | +0 ms | +37 ms | 44.4% |
 | Google 8.8.8.8 RTT | +0 ms | +6 ms | 5.1% |
 
-_Regenerated automatically by the running probe. Last updated: 2026-09-15 09:11 (UTC+8)._
+_Regenerated automatically by the running probe. Last updated: 2026-09-15 10:11 (UTC+8)._
