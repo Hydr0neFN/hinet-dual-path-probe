@@ -2,9 +2,14 @@
 
 **English** · [繁體中文](README.md)
 
+> **The measurement ended on 2026-09-21.** The probe and the hourly auto-publish are
+> both disabled, and the dataset is final: `2026-08-26 11:55:50` → `2026-09-21 01:40:11`,
+> **106,748 samples** (53,375 per path, i.e. 53,375 pairs) across 27 days. Every chart
+> and number below is the final version and will not change again.
+
 ## TL;DR — the rest of this was written by Claude. In one line: get the static plan, it makes a real difference. (Your line may differ.)
 
-A live, concurrent A/B of two ISP account types on the same line, measured from one
+A concurrent A/B of two ISP account types on the same line, measured from one
 Raspberry Pi — including a way to measure the **actual UDP path a Source 2 game (CS2, in this case) uses**,
 not just ICMP to something nearby.
 
@@ -14,21 +19,23 @@ past 60 ms, against one in 868 on the static account. And everything behind Clou
 different story entirely — 3 ms versus 24 ms at the median, with the dynamic path past
 200 ms and losing packets at peak hours.
 
-The data below is regenerated hourly from a probe that is still running.
+The data below was regenerated hourly by a probe running on the Pi. That probe was
+stopped on 2026-09-21, so the numbers end at its last cycle.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="data/chart-dark.en.svg">
   <img alt="Latency and packet loss over time on two ISP paths measured simultaneously" src="data/chart-light.en.svg">
 </picture>
 
-Full numbers, always current: **[data/stats.en.md](data/stats.en.md)** · raw samples:
+Full numbers, final: **[data/stats.en.md](data/stats.en.md)** · raw samples:
 [data/paired-scrubbed.csv](data/paired-scrubbed.csv)
 
 ### Day to day
 
-The chart above is a rolling 48-hour window, so a quiet day looks identical to the one
-before it. This one is a **daily rollup** -- one point per day, growing for as long as the
-probe keeps running:
+The chart above is a rolling 48-hour window -- the last 48 hours before the probe was
+switched off. During the measurement a quiet day looked identical to the one before it,
+so the auto-publish produced no commit and the repo looked stalled. This one is a
+**daily rollup** -- one point per day, covering the whole measurement:
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="data/history-dark.en.svg">
@@ -36,7 +43,8 @@ probe keeps running:
 </picture>
 
 Per-day numbers: **[data/history.csv](data/history.csv)** -- one row per day, so the commit
-diff is readable on its own. The last day is still accumulating and its values move.
+diff is readable on its own. The last day (2026-09-21) only covers up to 01:40, when the
+probe was stopped, so it holds fewer samples than a full day.
 
 ---
 
@@ -148,7 +156,7 @@ https://api.steampowered.com/ISteamApps/GetSDRConfig/v1/?appid=730
 
 ## What the data says
 
-See [data/stats.en.md](data/stats.en.md) for live figures. The shape of the result:
+See [data/stats.en.md](data/stats.en.md) for the final figures. The shape of the result:
 
 | | Static IP | Dynamic IP |
 |---|---|---|
@@ -174,17 +182,17 @@ So:
 The main probe samples every 45 seconds. What a player feels happens between two samples, so
 a median or a p95 cannot answer "does it bounce".
 
-So every cycle now also fires a short high-rate burst: 50 ICMP echoes per path at 20 pps,
-2.5 seconds, recorded as two extra columns — `jit_mdev` (the mdev of that burst, i.e. the
-jitter) and `jit_max` (the worst RTT inside it).
+So every cycle from then on also fired a short high-rate burst: 50 ICMP echoes per path
+at 20 pps, 2.5 seconds, recorded as two extra columns — `jit_mdev` (the mdev of that
+burst, i.e. the jitter) and `jit_max` (the worst RTT inside it).
 
 Why ICMP and not the UDP method used for the game path: the relay rate-limits its replies
 with a token bucket, and the reply count caps at 9–13 no matter how fast you send. **The
 price is that ICMP is not the game's UDP 5-tuple and may take a different ECMP bucket** —
 this toolkit cannot have both properties, so that is said up front rather than buried.
 
-As of the morning of 2026-08-28 this is **868 paired bursts** (about 9.5 hours), and still
-growing.
+The figures in this section are a snapshot from the morning of 2026-08-28: **868 paired
+bursts** (about 9.5 hours) at that point.
 
 The jitter itself, `jit_mdev` (ms):
 
@@ -288,10 +296,11 @@ fault did not end, it moved. It used to sit *after* the split, which is why only
 dynamic account paid for it. It now sits *before* the split, where neither account can
 avoid it.
 
-One thing this cannot tell you is whether the original problem is periodic. Measurement
-started on 2026-08-26, so the window is 3.5 days, and the problem was reported as coming
-and going over roughly a week before that. Less than one period is not enough to say a
-period has ended.
+One thing this cannot tell you is whether the original problem is periodic. This
+paragraph was written 3.5 days into the measurement, when the window was shorter than
+the roughly weekly cycle the problem had been reported on, and less than one period is
+not enough to say a period has ended. The final dataset runs to 26 days, but the
+question was not revisited here.
 
 **Two PCs, one LAN, 80 ms and 20 ms.** On the same day, two machines wired to the same LAN,
 on the same account, in the same game on the same server, at the same moment, sat at 80 ms
@@ -308,9 +317,9 @@ types.** Anyone promising that a static IP will fix your ping is skipping past t
   only see ~33 ms of it. A clean probe during a bad game would point at that leg.
 - One line, one ISP, one city. This is a method you can re-run, not a general claim about
   static IPs.
-- Three days and 7,053 paired samples so far; one night was lost to an unrelated hardware
-  failure (see below). The Cloudflare result is unambiguous; the jitter result now has the
-  samples to stand on, and keeps growing.
+- 26 days and **53,375 paired samples** in the final dataset (106,748 one-sided
+  samples in total); one night was lost to an unrelated hardware failure (see below).
+  The Cloudflare result is unambiguous, and the jitter result has the samples to stand on.
 - Both sessions share a BRAS, which removes it as a variable here — but says nothing about
   subscribers who land on a different one.
 
@@ -351,7 +360,7 @@ game can have completely different causes. Measure first.**
 | `scripts/hoptrace.sh` | hop-by-hop trace via plain `ping -t`, for when `mtr` is broken |
 | `scripts/udptrace.py` | UDP traceroute matching returned ICMP by source port |
 | `tools/gen_report.py` | CSV → charts + stats, stdlib only, runs on the Pi |
-| `tools/publish.sh` | regenerate and push, on a timer |
+| `tools/publish.sh` | regenerate and push; ran hourly on a timer during the measurement, now disabled |
 | `cf-heartbeat/` | a Cloudflare Worker dead-man switch for the probe host |
 | `systemd/` | the actual unit files, udev rules and PPPoE hooks, with install paths |
 

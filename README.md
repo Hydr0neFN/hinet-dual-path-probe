@@ -2,32 +2,34 @@
 
 **繁體中文** · [English](README.en.md)
 
+> **量測已於 2026-09-21 結束。** 探針與每小時自動發布都已停用，資料集就此定稿：`2026-08-26 11:55:50` → `2026-09-21 01:40:11`，共 **106,748 筆樣本**（每條路徑 53,375 筆，即 53,375 組配對），橫跨 27 天。以下圖表與數據皆為最終版本，不再變動。
+
 ## TL;DR 以下是Claude寫的，一句話:去申請固網，差很多。(因人而異)
 
 在同一條實體線路上，直接用一台 Raspberry Pi 對兩種 ISP 連線型態做**同步 A/B 測試**（而且量的是 **Source 2 遊戲(CS2)實際走的 UDP 路徑**，不是隨便 ping 個附近的 DNS 敷衍了事）。
 
 遊戲 ping 的中位數不會變低——兩種帳號在遊戲實際走的路徑上，中位數完全一樣。但穩定度差很多：浮動制每 6 次高頻量測就有 1 次出現超過 60 ms 的尖峰，固定制 868 次裡只有 1 次。Cloudflare 後面的東西差非常多：中位數 3 ms vs 24 ms，尖峰時段浮動制飆破 200 ms 並伴隨掉包。
 
-底下的數據由跑在 Pi 上的探針每小時自動更新。
+底下數據來自跑在 Pi 上的探針，量測期間每小時自動重新產生一次；探針已於 2026-09-21 停止，數據停在最後一輪。
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="data/chart-dark.svg">
   <img alt="兩條 ISP 路徑同時量測的延遲與封包遺失時序圖" src="data/chart-light.svg">
 </picture>
 
-完整數字（隨時更新）：**[data/stats.md](data/stats.md)** · 原始樣本：
+完整數據（最終版）：**[data/stats.md](data/stats.md)** · 原始樣本：
 [data/paired-scrubbed.csv](data/paired-scrubbed.csv)
 
 ### 長期走勢（每日彙整）
 
-上面那張主圖是**滾動 48 小時**的視窗。如果遇到沒什麼變化的一天，圖看起來會跟前一天一模一樣，自動發布也就不會產生任何 commit，讓 repo 看起來像停擺。下面這張則是**每日彙整**，一天一個資料點，探針跑越久圖就越長：
+上面那張主圖是**滾動 48 小時**視窗，停在探針關掉前的最後 48 小時。量測期間如果遇到沒什麼變化的一天，圖會跟前一天長得一模一樣，自動發布也就不會產生任何 commit，讓 repo 看起來像停擺。下面這張則是**每日彙整**，一天一個資料點，涵蓋整段量測期間：
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="data/history-dark.svg">
   <img alt="兩條 ISP 路徑逐日彙整的遊戲路徑 p95 與 Cloudflare 中位數" src="data/history-light.svg">
 </picture>
 
-逐日數據：**[data/history.csv](data/history.csv)**（一天一列——重點是光看 commit diff 就讀得懂，不必開圖）。最後一天還在累積中，數值會隨當天樣本變動。
+逐日數據：**[data/history.csv](data/history.csv)**（一天一列——重點是光看 commit diff 就懂，不必開圖）。最後一天（2026-09-21）只記錄到 01:40 探針停止為止，樣本數比其他整天少。
 
 ---
 
@@ -110,7 +112,7 @@ https://api.steampowered.com/ISteamApps/GetSDRConfig/v1/?appid=730
 
 ## 數據說了什麼
 
-即時數字見 [data/stats.md](data/stats.md)。統計出來的結果如下：
+完整數據見 [data/stats.md](data/stats.md)，統計結果如下：
 
 | | 固定制（Static IP） | 浮動制（Dynamic IP） |
 |---|---|---|
@@ -128,11 +130,11 @@ https://api.steampowered.com/ISteamApps/GetSDRConfig/v1/?appid=730
 
 主探針每 45 秒取樣一次。玩家感覺到的跳動發生在兩次取樣之間，中位數 / p95 回答不了「會不會跳」。
 
-所以探針現在**每一輪都多打一次高頻率突發**：每條路徑 50 個 ICMP、20 pps、2.5 秒，記錄兩個新欄位 `jit_mdev`（該次突發的 mdev，也就是抖動）與 `jit_max`（該次突發最糟的 RTT）。
+所以探針之後**每輪都多打一次高頻突發**：每條路徑 50 個 ICMP、20 pps、2.5 秒，記錄兩個新欄位 `jit_mdev`（該次突發的 mdev，也就是抖動）與 `jit_max`（該次突發最糟的 RTT）。
 
 為什麼用 ICMP 不用原本量遊戲路徑的 UDP：relay 對回應做 rate limiting（token bucket），送再快回應數都卡在 9～13 個。**代價是 ICMP 不是遊戲的 UDP 5-tuple，可能走到不同的 ECMP bucket**——這套工具沒辦法同時滿足這兩個條件，先講在前面。
 
-截至 2026-08-28 上午，累積 **868 組配對突發**（約 9.5 小時），而且還在長。
+本節數據是 2026-08-28 上午的快照：當時累積 **868 組配對突發**（約 9.5 小時）。
 
 抖動本身 `jit_mdev`（單位 ms）：
 
@@ -197,7 +199,7 @@ https://api.steampowered.com/ISteamApps/GetSDRConfig/v1/?appid=730
 
 168.95.94.134 是兩個 session 共用的節點，兩條路要到 BRAS 之後第二跳才分家。結論是故障換了位置——原本發生在兩條路徑分歧「之後」，所以只打到浮動制；現在發生在分歧「之前」，兩條都躲不掉。這是不同的故障，不是原本那個故障結束了。
 
-本專案量測從 2026-08-26 開始，觀測窗只有 3.5 天。使用者回報問題在此之前已斷續出現約一週，3.5 天短於回報的週期長度，無法對「這個週期是否結束」下任何結論。
+本段寫於量測開始第 3.5 天：當時觀測窗短於使用者回報的約一週週期，無法對「這個週期是否結束」下任何結論。最終資料集拉長到 26 天，但本文並未針對這點重新分析。
 
 同一天，兩台 PC 都用網路線接在同一個 LAN、同一個帳號、同一時間連線同一個伺服器玩同一款遊戲，人就坐在旁邊——一台 ping 80 ms，另一台 20 ms。這是使用者親眼看到的回報，不是本專案探針量出來的。所有共用上游節點完全相同，共用段故障解釋不了四倍差距，剩下的可能性是每台電腦各自的 relay 選擇或路徑分配。換句話說，單機層級的路徑差異可能比帳號類型更大，「換固定制一定有用」不能亂講。
 
@@ -205,7 +207,7 @@ https://api.steampowered.com/ISteamApps/GetSDRConfig/v1/?appid=730
 
 - relay 到遊戲伺服器這一段是量不到的。在遊戲內看到的約 82 ms 當中，探針只能監控到前半段往 relay 的約 33 ms。如果哪天玩起來很卡但探針數據完全正常，問題就出在後半段。
 - 這是單一線路、單一 ISP、單一城市的測試結果。這代表的是一套**大家可以自己拿去跑的測試方法**，不能直接當作固定 IP 的通則結論。
-- 目前已累積三天、7,053 筆配對樣本（其中一晚曾因無關的硬體故障遺失）。Cloudflare 的對比非常明確；抖動的部分樣本已經夠多，但目前仍在持續累積。
+- 最終累積 26 天、**53,375 組配對樣本**（總計 106,748 筆單邊樣本，其中一晚曾因無關的硬體故障遺失）。Cloudflare 的對比非常明確；抖動樣本數也足以支撐結論。
 - **無法推論分到其他 BRAS 的用戶情況。** 兩個 session 共用同一台 BRAS，所以在這份比較裡 BRAS 被排除為變因，但這對分到別台 BRAS 的用戶會怎樣完全沒有發言權。
 
 
@@ -235,7 +237,7 @@ https://api.steampowered.com/ISteamApps/GetSDRConfig/v1/?appid=730
 | `scripts/hoptrace.sh` | 用純 `ping -t` 做逐跳追蹤，當 `mtr` 壞掉時的備用方案 |
 | `scripts/udptrace.py` | UDP traceroute，利用來源埠比對回傳的 ICMP |
 | `tools/gen_report.py` | 將 CSV 轉為圖表與統計數據，只用標準函式庫，直接跑在 Pi 上 |
-| `tools/publish.sh` | 重新產生報表並 push，由 timer 定時觸發 |
+| `tools/publish.sh` | 重新產生報表並 push；量測期間由 timer 每小時觸發，現已停用 |
 | `cf-heartbeat/` | 部署在 Cloudflare Worker 上的 dead-man switch，用來監控探針主機 |
 | `systemd/` | 機器上實際運作的 unit 檔、udev 規則與 PPPoE hook，附安裝路徑說明 |
 
