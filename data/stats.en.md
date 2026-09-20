@@ -1,6 +1,6 @@
 # Results
 
-Full dataset: `2026-08-26 11:55:50` → `2026-09-20 10:16:46` · **103938 samples** (`51970` per path)
+Full dataset: `2026-08-26 11:55:50` → `2026-09-20 11:08:00` · **104092 samples** (`52047` per path)
 
 > These tables cover **every** sample ever recorded; the chart in the README shows only the last 48 hours, so the two drift apart as time goes on.
 
@@ -22,4 +22,4 @@ Both paths are measured from the same host in the same loop iteration, so a diff
 | Cloudflare 1.1.1.1 RTT | +1 ms | +34 ms | 48.8% |
 | Google 8.8.8.8 RTT | +0 ms | +5 ms | 4.8% |
 
-_Regenerated automatically by the running probe. Last updated: 2026-09-20 10:17 (UTC+8)._
+_Regenerated automatically by the running probe. Last updated: 2026-09-20 11:08 (UTC+8)._
