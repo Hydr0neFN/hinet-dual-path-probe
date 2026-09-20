@@ -101,7 +101,7 @@
 <circle cx="725.9" cy="379.0" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="755.0" cy="379.0" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="784.0" cy="379.0" r="4.5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
-<polyline fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round" points="58.0,269.0 87.0,274.0 116.1,379.0 145.1,379.0 174.2,274.0 203.2,269.0 232.2,269.0 261.3,269.0 290.3,269.0 319.4,269.0 348.4,274.0 377.4,379.0 406.5,379.0 435.5,379.0 464.6,379.0 493.6,379.0 522.6,379.0 551.7,379.0 580.7,379.0 609.8,379.0 638.8,379.0 667.8,379.0 696.9,274.0 725.9,274.0 755.0,274.0 784.0,274.0"/>
+<polyline fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round" points="58.0,269.0 87.0,274.0 116.1,379.0 145.1,379.0 174.2,274.0 203.2,269.0 232.2,269.0 261.3,269.0 290.3,269.0 319.4,269.0 348.4,274.0 377.4,379.0 406.5,379.0 435.5,379.0 464.6,379.0 493.6,379.0 522.6,379.0 551.7,379.0 580.7,379.0 609.8,379.0 638.8,379.0 667.8,379.0 696.9,274.0 725.9,274.0 755.0,274.0 784.0,354.0"/>
 <circle cx="58.0" cy="269.0" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="87.0" cy="274.0" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="116.1" cy="379.0" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
@@ -127,8 +127,8 @@
 <circle cx="696.9" cy="274.0" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="725.9" cy="274.0" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
 <circle cx="755.0" cy="274.0" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
-<circle cx="784.0" cy="274.0" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
-<text x="792.0" y="278.0" font-size="12" font-weight="600" fill="#d95926">24 ms</text>
+<circle cx="784.0" cy="354.0" r="4.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
+<text x="792.0" y="358.0" font-size="12" font-weight="600" fill="#d95926">8 ms</text>
 <text x="792.0" y="383.0" font-size="12" font-weight="600" fill="#3987e5">3 ms</text>
 <text x="58" y="417.0" font-size="13" font-weight="600" fill="#ffffff">遊戲路徑抖動 · 每輪 20 pps 突發的 mdev 中位數（ms）</text>
 <line x1="58" y1="578.0" x2="784.0" y2="578.0" stroke="#2e2e2c" stroke-width="1"/>
@@ -197,5 +197,5 @@
 <text x="638.8" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">09/15</text>
 <text x="755.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">09/19</text>
 <text x="784.0" y="596.0" font-size="11" text-anchor="middle" fill="#8a8880">09/20</text>
-<text x="58" y="630" font-size="11" fill="#8a8880">每日彙整 · 最後一天仍在累積中 · 產生時間 2026-09-20 22:09</text>
+<text x="58" y="630" font-size="11" fill="#8a8880">每日彙整 · 最後一天仍在累積中 · 產生時間 2026-09-20 23:09</text>
 </svg>
